@@ -4,6 +4,7 @@ from tkinter import filedialog, messagebox
 from docx import Document
 from tkcalendar import DateEntry
 from docx.shared import RGBColor
+from num2words import num2words
 import locale
 import os
 
@@ -29,25 +30,57 @@ def cargar_documento_por_defecto():
     else:
         archivo_label.config(text="No se encontró el documento por defecto.")
 
-def reemplazar_texto_en_parrafo(parrafo, reemplazos):
-    for texto_a_reemplazar, nuevo_texto in reemplazos.items():
-        if texto_a_reemplazar in parrafo.text:
-            for run in parrafo.runs:
-                if texto_a_reemplazar in run.text:
-                    run.text = run.text.replace(texto_a_reemplazar, nuevo_texto)
-                    run.font.color.rgb = RGBColor(0, 0, 0)  # Establecer el color del texto a negro
 
 def reemplazar_texto_en_documento(documento, reemplazos):
-    # Reemplazar texto en párrafos
     for parrafo in documento.paragraphs:
-        for run in parrafo.runs:
-            for clave, valor in reemplazos.items():
-                if clave in run.text:
-                    print(f"Reemplazando {clave} con {valor}")
-                    run.text = run.text.replace(clave, valor)
-                else:
-                    print(f"No se encontró {clave} en el párrafo: {run.text}")
+        for clave, valor in reemplazos.items():
+            if clave in parrafo.text:
+                print(f"Reemplazando {clave} con {valor} en el párrafo: {parrafo.text}")
+                parrafo.text = parrafo.text.replace(clave, valor)
 
+
+    for tabla in documento.tables:
+        for fila in tabla.rows:
+            for celda in fila.cells:
+                for parrafo in celda.paragraphs:
+                    for run in parrafo.runs:
+                        for clave, valor in reemplazos.items():
+                            if clave in run.text:
+                                print(f"Reemplazando {clave} con {valor} en una celda")
+                                run.text = run.text.replace(clave, valor)
+                                run.font.color.rgb = RGBColor(0, 0, 0)  # Establecer el color del texto a negro
+                                
+    documento.save("documento_modificado.docx")
+
+
+
+def reemplazar_salario_en_documento(doc_path, salario):
+    # Convierte el salario a palabras
+    salario_palabras = num2words(salario, lang='es').replace('coma', 'mil')
+    salario_texto = f"{salario:,} ({salario_palabras.upper()} PESOS M/CTE.)"
+    
+    # Diccionario de reemplazos
+    reemplazos = {"[SALARIO]": salario_texto}
+    
+    # Imprimir el diccionario de reemplazos para verificar
+    print("Diccionario de reemplazos:", reemplazos)
+
+    return reemplazos
+    
+    '''
+    # Cargar el documento
+    documento = Document(doc_path)
+    
+    # Verificar que el documento se ha cargado correctamente
+    print("Documento cargado correctamente.")
+    
+    # Reemplazar el texto en el documento
+    reemplazar_texto_en_documento(documento, reemplazos)
+    
+    '''
+
+
+'''
     # Reemplazar texto en tablas
     for tabla in documento.tables:
         for fila in tabla.rows:
@@ -63,14 +96,21 @@ def reemplazar_texto_en_documento(documento, reemplazos):
                                 print(f"No se encontró {clave} en la celda: {run.text}")
 
     documento.save("documento_modificado.docx")
-
+'''
 
 def reemplazar_texto():
     global archivo_cargado
+    salario = int(salario_trabajador.get().replace('.', ''))
     if archivo_cargado:
         documento = Document(archivo_cargado)
         fecha = fecha_nacimiento.get_date()
+
+        # Obtener los reemplazos de salario
+        reemplazos_salario = reemplazar_salario_en_documento(archivo_cargado, salario)   
+
+
         locale.setlocale(locale.LC_TIME, 'es_ES')  # Establecer el locale en español
+        
         reemplazos = {
             "[Empleador]": entrada_empleador.get(),
             "[N.I.T]": entrada_nit.get(),
@@ -83,10 +123,19 @@ def reemplazar_texto():
             "[DIA]": str(fecha.day),
             "[MES]": fecha.strftime('%B').upper(),
             "[ANO]": str(fecha.year),
-            "[ESTADO CIVIL]": estado_civil.get()
-           
+            "[ESTADO CIVIL]": estado_civil.get(),           
+            "[DIRECCION]": entrada_direccion.get(),  
+            "[TELEFONO]": entrada_telefono.get(), 
+            "[CARGO]": entrada_cargo.get()
+            
             
         }
+
+        # Combinar los diccionarios de reemplazos
+        reemplazos.update(reemplazos_salario)
+
+        # Imprimir el diccionario de reemplazos combinado para verificar
+        print("Diccionario de reemplazos (combinado):", reemplazos)
 
         reemplazar_texto_en_documento(documento, reemplazos)
 
@@ -192,12 +241,12 @@ estado_civil.grid(row=8, column=5, padx=5, pady=5)
 tk.Label(root, text="Dirección", bg='#b0d4ec',font=("Helvetica", 12, "bold")).grid(row=9, column=0, columnspan=4, padx=5, pady=10)
 
 tk.Label(root, text="DIRECCIÓN:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=9, column=2, padx=5, pady=5, sticky="e")
-entrada_ciudad = tk.Entry(root)
-entrada_ciudad.grid(row=9, column=3, padx=5, pady=5)
+entrada_direccion = tk.Entry(root)
+entrada_direccion.grid(row=9, column=3, padx=5, pady=5)
 
 tk.Label(root, text="TELÉFONO:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=9, column=4, padx=5, pady=5, sticky="e")
-entrada_ciudad = tk.Entry(root)
-entrada_ciudad.grid(row=9, column=5, padx=5, pady=5)
+entrada_telefono = tk.Entry(root)
+entrada_telefono.grid(row=9, column=5, padx=5, pady=5)
 
 root.grid_rowconfigure(10, minsize=20)
 
@@ -208,13 +257,13 @@ root.grid_rowconfigure(10, minsize=20)
 tk.Label(root, text="DATOS DEL CONTRATO", font=("Helvetica", 12, "bold")).grid(row=11, column=0, columnspan=4, padx=5, pady=10)
 
 # Datos del Contrrato
-tk.Label(root, text="NOMBRE TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=11, column=2, padx=5, pady=5, sticky="e")
-entrada_trabajador = tk.Entry(root)
-entrada_trabajador.grid(row=11, column=3, padx=5, pady=5)
+tk.Label(root, text="CARGO QUE DESEMPEÑARÁ:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=11, column=2, padx=5, pady=5, sticky="e")
+entrada_cargo = tk.Entry(root)
+entrada_cargo.grid(row=11, column=3, padx=5, pady=5)
 
-tk.Label(root, text="CC DEL TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=11, column=4, padx=5, pady=5, sticky="e")
-entrada_cc_trabajador = tk.Entry(root)
-entrada_cc_trabajador.grid(row=11, column=5, padx=5, pady=5)
+tk.Label(root, text="SALARIO DEL TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=11, column=4, padx=5, pady=5, sticky="e")
+salario_trabajador = tk.Entry(root)
+salario_trabajador.grid(row=11, column=5, padx=5, pady=5)
 
 # Espaciado entre filas
 root.grid_rowconfigure(12, minsize=20)
@@ -222,41 +271,45 @@ root.grid_rowconfigure(12, minsize=20)
 
 
 #Fecha y lugar de Nacimiento
-
+'''
 # Label para Fecha y lugar de Nacimiento
-tk.Label(root, text="Fecha y lugar de Nacimiento", bg='#b0d4ec',font=("Helvetica", 13, "bold")).grid(row=11, column=0, columnspan=4, padx=5, pady=10)
+tk.Label(root, text="Fecha y lugar de Nacimiento", bg='#b0d4ec',font=("Helvetica", 13, "bold")).grid(row=13, column=0, columnspan=4, padx=5, pady=10)
 
 # Label para Fecha de Nacimiento
 tk.Label(root, text="Fecha de Nacimiento:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=13, column=2, padx=5, pady=5, sticky="e")
 fecha_nacimiento = DateEntry(root, date_pattern='dd/MM/yyyy')
 fecha_nacimiento.grid(row=13, column=3, padx=5, pady=5)
 
-tk.Label(root, text="DEPARTAMENTO:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=14, column=4, padx=5, pady=5, sticky="e")
-entrada_departamento = tk.Entry(root)
-entrada_departamento.grid(row=14, column=5, padx=5, pady=5)
+'''
 
-tk.Label(root, text="CIUDAD:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=15, column=2, padx=5, pady=5, sticky="e")
-entrada_ciudad = tk.Entry(root)
-entrada_ciudad.grid(row=15, column=3, padx=5, pady=5)
+tk.Label(root, text="DEPARTAMENTO:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=13, column=4, padx=5, pady=5, sticky="e")
+entrada_departamento_contrato = tk.Entry(root)
+entrada_departamento_contrato.grid(row=13, column=5, padx=5, pady=5)
 
+tk.Label(root, text="CIUDAD:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=14, column=2, padx=5, pady=5, sticky="e")
+entrada_ciudad_contrato = tk.Entry(root)
+entrada_ciudad_contrato.grid(row=14, column=3, padx=5, pady=5)
+
+root.grid_rowconfigure(15, minsize=20)
+'''
 #Estado Civil
-tk.Label(root, text="ESTADO CIVIL:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=16, column=4, padx=5, pady=5, sticky="e")
+tk.Label(root, text="ESTADO CIVIL:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=15, column=2, padx=5, pady=5, sticky="e")
 estado_civil = ttk.Combobox(root, values=["SOLTERO", "SOLTERA", "CASADO", "CASADA", "VIUDO", "VIUDA", "SEPARADO", "SEPARADA", "UNION LIBRE"], state="readonly")
 estado_civil.set("SOLTERO")  # Valor por defecto
-estado_civil.grid(row=16, column=5, padx=5, pady=5)
+estado_civil.grid(row=15, column=3, padx=5, pady=5)
 
 
 # Label para Fecha y lugar de Nacimiento
-tk.Label(root, text="Dirección", bg='#b0d4ec',font=("Helvetica", 12, "bold")).grid(row=17, column=0, columnspan=4, padx=5, pady=10)
+tk.Label(root, text="Dirección", bg='#b0d4ec',font=("Helvetica", 12, "bold")).grid(row=16, column=0, columnspan=4, padx=5, pady=10)
 
-tk.Label(root, text="DIRECCIÓN:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=17, column=2, padx=5, pady=5, sticky="e")
-entrada_ciudad = tk.Entry(root)
-entrada_ciudad.grid(row=17, column=3, padx=5, pady=5)
+tk.Label(root, text="DIRECCIÓN:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=16, column=2, padx=5, pady=5, sticky="e")
+entrada_direccion = tk.Entry(root)
+entrada_direccion.grid(row=16, column=3, padx=5, pady=5)
 
-tk.Label(root, text="TELÉFONO:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=17, column=4, padx=5, pady=5, sticky="e")
-entrada_ciudad = tk.Entry(root)
-entrada_ciudad.grid(row=17, column=5, padx=5, pady=(10, 20))
-
+tk.Label(root, text="TELÉFONO:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=16, column=4, padx=5, pady=5, sticky="e")
+entrada_telefono = tk.Entry(root)
+entrada_telefono.grid(row=16, column=5, padx=5, pady=(10, 20))
+'''
 
 
 
