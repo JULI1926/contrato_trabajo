@@ -11,6 +11,22 @@ import os
 # Variable global para almacenar la ruta del archivo cargado
 archivo_cargado = None
 
+def solo_letras(char):
+    if char.isalpha() or char == "":
+        return True
+    else:
+        messagebox.showerror("Entrada inválida", "Solo se permiten letras.")
+        return False
+    
+def solo_numeros(char):
+    # Verifica si el carácter ingresado es un número o si está vacío (para permitir borrar)
+    if char.isdigit() or char == "":
+        return True
+    else:
+        # Si no es un número, muestra un mensaje de error
+        messagebox.showerror("Entrada inválida", "Solo se permiten números.")
+        return False
+
 def cargar_documento():
     global archivo_cargado
     archivo_cargado = filedialog.askopenfilename(
@@ -155,175 +171,136 @@ def reemplazar_texto():
 
 root = tk.Tk()
 root.configure(bg='#b0d4ec')
-root.title("Reemplazar Texto en Documento Word")
+root.title("CONTRATO DE TRABAJO AYUDA SOCIAL Y LABORAL")
 
 # Crear un marco para agrupar los widgets
-frame = tk.Frame(root, padx=10, pady=10)
-frame.grid(row=0, column=0, padx=10, pady=10)
+frame = tk.Frame(root, padx=10, pady=10, bg='#b0d4ec')
+frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+
+# Configurar las columnas y filas para que se expandan
+for i in range(6):
+    root.grid_columnconfigure(i, weight=1)
+for i in range(21):
+    root.grid_rowconfigure(i, weight=1)
+
+
+# Registrar la función de validación
+vcmd = (root.register(solo_letras), '%P')
+vcmdnum = (root.register(solo_numeros), '%P')
 
 # Subtítulo Datos del Empleador
-tk.Label(root, text="DATOS DEL EMPLEADOR", font=("Helvetica", 12, "bold")).grid(row=1, column=0, columnspan=4, padx=5, pady=10)
-
+tk.Label(root, text="DATOS DEL EMPLEADOR", font=("Helvetica", 12, "bold")).grid(row=1, column=2, columnspan=4, padx=5, pady=10)
 
 # Datos del Empleador
-tk.Label(root, text="NOMBRE DEL EMPLEADOR", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=1, column=2, padx=5, pady=5, sticky="e")
-entrada_empleador = tk.Entry(root)
-entrada_empleador.grid(row=1, column=3, padx=5, pady=5)
+tk.Label(root, text="NOMBRE DEL EMPLEADOR", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=2, column=1, padx=5, pady=5, sticky="e")
+entrada_empleador = tk.Entry(root, validate="key", validatecommand=vcmd)
+entrada_empleador.grid(row=2, column=2, padx=5, pady=5, sticky="ew")
 
-tk.Label(root, text="N.I.T EMPLEADOR:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=1, column=4, padx=5, pady=5, sticky="e")
+tk.Label(root, text="N.I.T EMPLEADOR:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=2, column=3, padx=5, pady=5, sticky="e")
 entrada_nit = tk.Entry(root)
-entrada_nit.grid(row=1, column=5, padx=5, pady=5)
+entrada_nit.grid(row=2, column=4, padx=5, pady=5, sticky="ew")
 
 # Espaciado entre filas
-root.grid_rowconfigure(2, minsize=20)
-
+root.grid_rowconfigure(3, minsize=20)
 
 # Subtítulo Datos del Representante Legal
-tk.Label(root, text="DATOS DEL REPRESENTANTE LEGAL", font=("Helvetica", 11, "bold")).grid(row=3, column=0, columnspan=4, padx=5, pady=10)
+tk.Label(root, text="DATOS DEL REPRESENTANTE LEGAL", font=("Helvetica", 11, "bold")).grid(row=4, column=2, columnspan=4, padx=5, pady=10)
 
 # Datos del Representante Legal
-tk.Label(root, text="REPRESENTANTE LEGAL:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=3, column=2, padx=5, pady=5, sticky="e")
-entrada_representante_legal = tk.Entry(root)
-entrada_representante_legal.grid(row=3, column=3, padx=5, pady=5)
+tk.Label(root, text="REPRESENTANTE LEGAL:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=5, column=1, padx=5, pady=5, sticky="e")
+entrada_representante_legal = tk.Entry(root, validate="key", validatecommand=vcmd)
+entrada_representante_legal.grid(row=5, column=2, padx=5, pady=5, sticky="ew")
 
-tk.Label(root, text="CC REPRESENTANTE LEGAL:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=3, column=4, padx=5, pady=5, sticky="e")
-entrada_cc_representante_legal = tk.Entry(root)
-entrada_cc_representante_legal.grid(row=3, column=5, padx=5, pady=5)
-
-# Espaciado entre filas
-root.grid_rowconfigure(4, minsize=20)
-
-
-
-# Subtítulo Datos del Trabajador
-tk.Label(root, text="DATOS DEL TRABAJADOR", font=("Helvetica", 11, "bold")).grid(row=6, column=0, columnspan=4, padx=5, pady=10)
-
-# Datos del Trabajador
-tk.Label(root, text="NOMBRE TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=6, column=2, padx=5, pady=5, sticky="e")
-entrada_trabajador = tk.Entry(root)
-entrada_trabajador.grid(row=6, column=3, padx=5, pady=5)
-
-tk.Label(root, text="CC DEL TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=6, column=4, padx=5, pady=5, sticky="e")
-entrada_cc_trabajador = tk.Entry(root)
-entrada_cc_trabajador.grid(row=6, column=5, padx=5, pady=5)
+tk.Label(root, text="CC REPRESENTANTE LEGAL:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=5, column=3, padx=5, pady=5, sticky="e")
+entrada_cc_representante_legal = tk.Entry(root, validate="key", validatecommand=vcmdnum)
+entrada_cc_representante_legal.grid(row=5, column=4, padx=5, pady=5, sticky="ew")
 
 # Espaciado entre filas
 root.grid_rowconfigure(6, minsize=20)
 
+# Subtítulo Datos del Trabajador
+tk.Label(root, text="DATOS DEL TRABAJADOR", font=("Helvetica", 11, "bold")).grid(row=7, column=2, columnspan=4, padx=5, pady=10)
 
+# Datos del Trabajador
+tk.Label(root, text="NOMBRE TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=8, column=1, padx=5, pady=5, sticky="e")
+entrada_trabajador = tk.Entry(root)
+entrada_trabajador.grid(row=8, column=2, padx=5, pady=5, sticky="ew")
 
-#Fecha y lugar de Nacimiento
-
-# Label para Fecha y lugar de Nacimiento
-tk.Label(root, text="Fecha y lugar de Nacimiento", bg='#b0d4ec',font=("Helvetica", 12, "bold")).grid(row=7, column=0, columnspan=4, padx=5, pady=10)
-
-# Label para Fecha de Nacimiento
-tk.Label(root, text="Fecha de Nacimiento:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=7, column=2, padx=5, pady=5, sticky="e")
-fecha_nacimiento = DateEntry(root, date_pattern='dd/MM/yyyy')
-fecha_nacimiento.grid(row=7, column=3, padx=5, pady=5)
-
-tk.Label(root, text="DEPARTAMENTO:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=7, column=4, padx=5, pady=5, sticky="e")
-entrada_departamento = tk.Entry(root)
-entrada_departamento.grid(row=7, column=5, padx=5, pady=5)
-
-tk.Label(root, text="CIUDAD:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=8, column=2, padx=5, pady=5, sticky="e")
-entrada_ciudad = tk.Entry(root)
-entrada_ciudad.grid(row=8, column=3, padx=5, pady=5)
-
-#Estado Civil
-tk.Label(root, text="ESTADO CIVIL:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=8, column=4, padx=5, pady=5, sticky="e")
-estado_civil = ttk.Combobox(root, values=["SOLTERO", "SOLTERA", "CASADO", "CASADA", "VIUDO", "VIUDA", "SEPARADO", "SEPARADA", "UNION LIBRE"], state="readonly")
-estado_civil.set("SOLTERO")  # Valor por defecto
-estado_civil.grid(row=8, column=5, padx=5, pady=5)
-
-
-# Label para Fecha y lugar de Nacimiento
-tk.Label(root, text="Dirección", bg='#b0d4ec',font=("Helvetica", 12, "bold")).grid(row=9, column=0, columnspan=4, padx=5, pady=10)
-
-tk.Label(root, text="DIRECCIÓN:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=9, column=2, padx=5, pady=5, sticky="e")
-entrada_direccion = tk.Entry(root)
-entrada_direccion.grid(row=9, column=3, padx=5, pady=5)
-
-tk.Label(root, text="TELÉFONO:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=9, column=4, padx=5, pady=5, sticky="e")
-entrada_telefono = tk.Entry(root)
-entrada_telefono.grid(row=9, column=5, padx=5, pady=5)
-
-root.grid_rowconfigure(10, minsize=20)
-
-############################  DATOS DEL CONTRATO  #########################
-                                        
-
-# Subtítulo Datos del Contrato   
-tk.Label(root, text="DATOS DEL CONTRATO", font=("Helvetica", 12, "bold")).grid(row=11, column=0, columnspan=4, padx=5, pady=10)
-
-# Datos del Contrrato
-tk.Label(root, text="CARGO QUE DESEMPEÑARÁ:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=11, column=2, padx=5, pady=5, sticky="e")
-entrada_cargo = tk.Entry(root)
-entrada_cargo.grid(row=11, column=3, padx=5, pady=5)
-
-tk.Label(root, text="SALARIO DEL TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=11, column=4, padx=5, pady=5, sticky="e")
-salario_trabajador = tk.Entry(root)
-salario_trabajador.grid(row=11, column=5, padx=5, pady=5)
+tk.Label(root, text="CC DEL TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=8, column=3, padx=5, pady=5, sticky="e")
+entrada_cc_trabajador = tk.Entry(root)
+entrada_cc_trabajador.grid(row=8, column=4, padx=5, pady=5, sticky="ew")
 
 # Espaciado entre filas
-root.grid_rowconfigure(12, minsize=20)
+root.grid_rowconfigure(9, minsize=20)
 
+# Fecha y lugar de Nacimiento
+tk.Label(root, text="Fecha y lugar de Nacimiento", bg='#b0d4ec', font=("Helvetica", 12, "bold")).grid(row=10, column=2, columnspan=4, padx=5, pady=10)
 
-
-#Fecha y lugar de Nacimiento
-'''
-# Label para Fecha y lugar de Nacimiento
-tk.Label(root, text="Fecha y lugar de Nacimiento", bg='#b0d4ec',font=("Helvetica", 13, "bold")).grid(row=13, column=0, columnspan=4, padx=5, pady=10)
-
-# Label para Fecha de Nacimiento
-tk.Label(root, text="Fecha de Nacimiento:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=13, column=2, padx=5, pady=5, sticky="e")
+tk.Label(root, text="Fecha de Nacimiento:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=11, column=1, padx=5, pady=5, sticky="e")
 fecha_nacimiento = DateEntry(root, date_pattern='dd/MM/yyyy')
-fecha_nacimiento.grid(row=13, column=3, padx=5, pady=5)
+fecha_nacimiento.grid(row=11, column=2, padx=5, pady=5, sticky="ew")
 
-'''
+tk.Label(root, text="DEPARTAMENTO:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=11, column=3, padx=5, pady=5, sticky="e")
+entrada_departamento = tk.Entry(root)
+entrada_departamento.grid(row=11, column=4, padx=5, pady=5, sticky="ew")
 
-tk.Label(root, text="DEPARTAMENTO:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=13, column=4, padx=5, pady=5, sticky="e")
-entrada_departamento_contrato = tk.Entry(root)
-entrada_departamento_contrato.grid(row=13, column=5, padx=5, pady=5)
+tk.Label(root, text="CIUDAD:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=12, column=1, padx=5, pady=5, sticky="e")
+entrada_ciudad = tk.Entry(root)
+entrada_ciudad.grid(row=12, column=2, padx=5, pady=5, sticky="ew")
 
-tk.Label(root, text="CIUDAD:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=14, column=2, padx=5, pady=5, sticky="e")
-entrada_ciudad_contrato = tk.Entry(root)
-entrada_ciudad_contrato.grid(row=14, column=3, padx=5, pady=5)
-
-root.grid_rowconfigure(15, minsize=20)
-'''
-#Estado Civil
-tk.Label(root, text="ESTADO CIVIL:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=15, column=2, padx=5, pady=5, sticky="e")
+tk.Label(root, text="ESTADO CIVIL:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=12, column=3, padx=5, pady=5, sticky="e")
 estado_civil = ttk.Combobox(root, values=["SOLTERO", "SOLTERA", "CASADO", "CASADA", "VIUDO", "VIUDA", "SEPARADO", "SEPARADA", "UNION LIBRE"], state="readonly")
 estado_civil.set("SOLTERO")  # Valor por defecto
-estado_civil.grid(row=15, column=3, padx=5, pady=5)
+estado_civil.grid(row=12, column=4, padx=5, pady=5, sticky="ew")
 
+# Dirección
+tk.Label(root, text="Dirección", bg='#b0d4ec', font=("Helvetica", 12, "bold")).grid(row=13, column=2, columnspan=4, padx=5, pady=10)
 
-# Label para Fecha y lugar de Nacimiento
-tk.Label(root, text="Dirección", bg='#b0d4ec',font=("Helvetica", 12, "bold")).grid(row=16, column=0, columnspan=4, padx=5, pady=10)
-
-tk.Label(root, text="DIRECCIÓN:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=16, column=2, padx=5, pady=5, sticky="e")
+tk.Label(root, text="DIRECCIÓN:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=14, column=1, padx=5, pady=5, sticky="e")
 entrada_direccion = tk.Entry(root)
-entrada_direccion.grid(row=16, column=3, padx=5, pady=5)
+entrada_direccion.grid(row=14, column=2, padx=5, pady=5, sticky="ew")
 
-tk.Label(root, text="TELÉFONO:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=16, column=4, padx=5, pady=5, sticky="e")
+tk.Label(root, text="TELÉFONO:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=14, column=3, padx=5, pady=5, sticky="e")
 entrada_telefono = tk.Entry(root)
-entrada_telefono.grid(row=16, column=5, padx=5, pady=(10, 20))
-'''
+entrada_telefono.grid(row=14, column=4, padx=5, pady=5, sticky="ew")
 
+root.grid_rowconfigure(15, minsize=20)
 
+# Datos del Contrato
+tk.Label(root, text="DATOS DEL CONTRATO", font=("Helvetica", 12, "bold")).grid(row=16, column=2, columnspan=4, padx=5, pady=10)
+
+tk.Label(root, text="CARGO QUE DESEMPEÑARÁ:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=17, column=1, padx=5, pady=5, sticky="e")
+entrada_cargo = tk.Entry(root)
+entrada_cargo.grid(row=17, column=2, padx=5, pady=5, sticky="ew")
+
+tk.Label(root, text="SALARIO DEL TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=17, column=3, padx=5, pady=5, sticky="e")
+salario_trabajador = tk.Entry(root)
+salario_trabajador.grid(row=17, column=4, padx=5, pady=5, sticky="ew")
+
+# Espaciado entre filas
+root.grid_rowconfigure(18, minsize=20)
+
+tk.Label(root, text="DEPARTAMENTO:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=19, column=3, padx=5, pady=5, sticky="e")
+entrada_departamento_contrato = tk.Entry(root)
+entrada_departamento_contrato.grid(row=19, column=4, padx=5, pady=5, sticky="ew")
+
+tk.Label(root, text="CIUDAD:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=19, column=1, padx=5, pady=5, sticky="e")
+entrada_ciudad_contrato = tk.Entry(root)
+entrada_ciudad_contrato.grid(row=19, column=2, padx=5, pady=5, sticky="ew")
+
+root.grid_rowconfigure(21, minsize=20)
 
 # Cargar el documento
 cargar_btn = tk.Button(root, text="Cargar Documento", command=cargar_documento)
-cargar_btn.grid(row=18, column=0, columnspan=2, pady=10)
+cargar_btn.grid(row=22, column=2, columnspan=2, pady=10, sticky="ew")
 
 # Botón para reemplazar el texto
 reemplazar_btn = tk.Button(root, text="Reemplazar Texto", command=reemplazar_texto)
-reemplazar_btn.grid(row=19, column=0, columnspan=2, pady=10)
+reemplazar_btn.grid(row=23, column=2, columnspan=2, pady=10, sticky="ew")
 
 # Crear y colocar el Label para mostrar el archivo cargado
 archivo_label = tk.Label(root, text="No se ha cargado ningún documento.")
-archivo_label.grid(row=20, column=0, columnspan=2, pady=10)
+archivo_label.grid(row=24, column=2, columnspan=2, pady=10, sticky="ew")
 
 # Cargar el documento por defecto al iniciar la aplicación
 cargar_documento_por_defecto()
