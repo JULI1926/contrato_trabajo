@@ -6,10 +6,35 @@ from tkcalendar import DateEntry
 from docx.shared import RGBColor
 from num2words import num2words
 import locale
+import json
 import os
 
 # Variable global para almacenar la ruta del archivo cargado
 archivo_cargado = None
+
+# Cargar el archivo JSON
+def cargar_datos_json(ruta_archivo):
+    """Carga el archivo JSON y devuelve los datos."""
+    with open('municipios.json', 'r', encoding='utf-8') as archivo_json:
+        return json.load(archivo_json)
+    
+
+def procesar_datos(datos_json):
+    """Procesa los datos JSON y devuelve una lista de departamentos y un diccionario de municipios."""
+    # Extraer los departamentos únicos
+    departamentos = sorted(set(dato["departamento"] for dato in datos_json))
+
+    # Crear un diccionario con los municipios por departamento
+    municipios_por_departamento = {}
+    for dato in datos_json:
+        depto = dato["departamento"]
+        if depto not in municipios_por_departamento:
+            municipios_por_departamento[depto] = []
+        municipios_por_departamento[depto].append(dato["municipio"])
+
+    return departamentos, municipios_por_departamento
+
+
 
 def solo_letras(char):
     if char.isalpha() or char == "":
@@ -201,11 +226,11 @@ tk.Label(root, text="DATOS DEL EMPLEADOR", font=("Helvetica", 14, "bold")).grid(
 
 # Datos del Empleador
 tk.Label(root, text="NOMBRE DEL EMPLEADOR", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=2, column=1, padx=5, pady=5, sticky="e")
-entrada_empleador = ttk.Entry(root, style="Rounded.TEntry", validate="key", validatecommand=vcmd)
+entrada_empleador = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14), validate="key")
 entrada_empleador.grid(row=2, column=2, padx=5, pady=5, sticky="ew")
 
 tk.Label(root, text="N.I.T EMPLEADOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=2, column=3, padx=5, pady=5, sticky="e")
-entrada_nit = ttk.Entry(root, style="Rounded.TEntry")
+entrada_nit = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14))
 entrada_nit.grid(row=2, column=4, padx=5, pady=5, sticky="ew")
 
 # Espaciado entre filas
@@ -216,11 +241,11 @@ tk.Label(root, text="DATOS DEL REPRESENTANTE LEGAL", font=("Helvetica", 16, "bol
 
 # Datos del Representante Legal
 tk.Label(root, text="REPRESENTANTE LEGAL:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=5, column=1, padx=5, pady=5, sticky="e")
-entrada_representante_legal = ttk.Entry(root, style="Rounded.TEntry", validate="key", validatecommand=vcmd)
+entrada_representante_legal = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14), validate="key", validatecommand=vcmd)
 entrada_representante_legal.grid(row=5, column=2, padx=5, pady=5, sticky="ew")
 
 tk.Label(root, text="CC REPRESENTANTE LEGAL:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=5, column=3, padx=5, pady=5, sticky="e")
-entrada_cc_representante_legal = ttk.Entry(root, style="Rounded.TEntry", validate="key", validatecommand=vcmdnum)
+entrada_cc_representante_legal = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14), validate="key", validatecommand=vcmdnum)
 entrada_cc_representante_legal.grid(row=5, column=4, padx=5, pady=5, sticky="ew")
 
 # Espaciado entre filas
@@ -231,11 +256,11 @@ tk.Label(root, text="DATOS DEL TRABAJADOR", font=("Helvetica", 16, "bold")).grid
 
 # Datos del Trabajador
 tk.Label(root, text="NOMBRE TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=8, column=1, padx=5, pady=5, sticky="e")
-entrada_trabajador = ttk.Entry(root, style="Rounded.TEntry")
+entrada_trabajador = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14))
 entrada_trabajador.grid(row=8, column=2, padx=5, pady=5, sticky="ew")
 
 tk.Label(root, text="CC DEL TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=8, column=3, padx=5, pady=5, sticky="e")
-entrada_cc_trabajador = ttk.Entry(root, style="Rounded.TEntry")
+entrada_cc_trabajador = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14))
 entrada_cc_trabajador.grid(row=8, column=4, padx=5, pady=5, sticky="ew")
 
 # Espaciado entre filas
@@ -245,31 +270,61 @@ root.grid_rowconfigure(9, minsize=20)
 tk.Label(root, text="Fecha y lugar de Nacimiento", bg='#b0d4ec', font=("Helvetica", 12, "bold")).grid(row=10, column=2, columnspan=4, padx=5, pady=10)
 
 tk.Label(root, text="Fecha de Nacimiento:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=11, column=1, padx=5, pady=5, sticky="e")
-fecha_nacimiento = DateEntry(root, style="Rounded.TEntry", date_pattern='dd/MM/yyyy')
+fecha_nacimiento = DateEntry(root, style="Rounded.TEntry", font=("Helvetica", 14), date_pattern='dd/MM/yyyy')
+fecha_nacimiento.delete(0, "end")
+fecha_nacimiento.insert(0, "dd/MM/AAAA")
 fecha_nacimiento.grid(row=11, column=2, padx=5, pady=5, sticky="ew")
 
-tk.Label(root, text="DEPARTAMENTO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=11, column=3, padx=5, pady=5, sticky="e")
-entrada_departamento = ttk.Entry(root, style="Rounded.TEntry")
-entrada_departamento.grid(row=11, column=4, padx=5, pady=5, sticky="ew")
 
-tk.Label(root, text="CIUDAD:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=12, column=1, padx=5, pady=5, sticky="e")
-entrada_ciudad = ttk.Entry(root, style="Rounded.TEntry")
-entrada_ciudad.grid(row=12, column=2, padx=5, pady=5, sticky="ew")
+def autompletar_municipios(departamentos, municipios_por_departamento):  
+    
+    # Función para actualizar el combobox de municipios cuando cambie el departamento
+    def actualizar_municipios(event):
+        departamento_seleccionado = entrada_departamento.get()
+        entrada_ciudad["values"] = municipios_por_departamento.get(departamento_seleccionado, [])
+        entrada_ciudad.set('')  # Limpiar la selección de municipio al cambiar el departamento
+
+    
+    # Label y combobox para el departamento
+    tk.Label(root, text="DEPARTAMENTO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=11, column=3, padx=5, pady=5, sticky="e")
+    entrada_departamento = ttk.Combobox(root, values=departamentos, font=("Helvetica", 14))
+    entrada_departamento.grid(row=11, column=4, padx=5, pady=5, sticky="ew")
+    entrada_departamento.bind("<<ComboboxSelected>>", actualizar_municipios)
+
+    # Label y combobox para el municipio
+    tk.Label(root, text="MUNICIPIO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=12, column=1, padx=5, pady=5, sticky="e")
+    entrada_ciudad = ttk.Combobox(root, font=("Helvetica", 14))
+    entrada_ciudad.grid(row=12, column=2, padx=5, pady=5, sticky="ew")
+
+def main():
+    # Cargar y procesar los datos JSON
+    datos_json = cargar_datos_json('ruta/al/archivo.json')
+    departamentos, municipios_por_departamento = procesar_datos(datos_json)
+
+    # Inicializar la interfaz
+    autompletar_municipios(departamentos, municipios_por_departamento)
+
+if __name__ == "__main__":
+    main()
+
+# Configurar la fuente para los elementos del Combobox
+root.option_add('*TCombobox*Listbox.font', ("Helvetica", 14))
+root.option_add('*TCombobox.font', ("Helvetica", 14)) 
 
 tk.Label(root, text="ESTADO CIVIL:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=12, column=3, padx=5, pady=5, sticky="e")
 estado_civil = ttk.Combobox(root, values=["SOLTERO", "SOLTERA", "CASADO", "CASADA", "VIUDO", "VIUDA", "SEPARADO", "SEPARADA", "UNION LIBRE"], state="readonly")
-estado_civil.set("SOLTERO")  # Valor por defecto
+estado_civil.set("Seleccione una opción ...")  # Valor por defecto
 estado_civil.grid(row=12, column=4, padx=5, pady=5, sticky="ew")
 
 # Dirección
 tk.Label(root, text="Dirección y Teléfono", bg='#b0d4ec', font=("Helvetica", 12, "bold")).grid(row=13, column=2, columnspan=4, padx=5, pady=10)
 
 tk.Label(root, text="DIRECCIÓN:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=14, column=1, padx=5, pady=5, sticky="e")
-entrada_direccion = ttk.Entry(root, style="Rounded.TEntry")
+entrada_direccion = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14))
 entrada_direccion.grid(row=14, column=2, padx=5, pady=5, sticky="ew")
 
 tk.Label(root, text="TELÉFONO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=14, column=3, padx=5, pady=5, sticky="e")
-entrada_telefono = ttk.Entry(root, style="Rounded.TEntry")
+entrada_telefono = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14))
 entrada_telefono.grid(row=14, column=4, padx=5, pady=5, sticky="ew")
 
 root.grid_rowconfigure(15, minsize=20)
@@ -278,22 +333,22 @@ root.grid_rowconfigure(15, minsize=20)
 tk.Label(root, text="DATOS DEL CONTRATO", font=("Helvetica", 12, "bold")).grid(row=16, column=2, columnspan=4, padx=5, pady=10)
 
 tk.Label(root, text="CARGO QUE DESEMPEÑARÁ:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=17, column=1, padx=5, pady=5, sticky="e")
-entrada_cargo = ttk.Entry(root, style="Rounded.TEntry")
+entrada_cargo = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14))
 entrada_cargo.grid(row=17, column=2, padx=5, pady=5, sticky="ew")
 
 tk.Label(root, text="SALARIO DEL TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=17, column=3, padx=5, pady=5, sticky="e")
-salario_trabajador = ttk.Entry(root, style="Rounded.TEntry")
+salario_trabajador = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14))
 salario_trabajador.grid(row=17, column=4, padx=5, pady=5, sticky="ew")
 
 # Espaciado entre filas
 root.grid_rowconfigure(18, minsize=20)
 
 tk.Label(root, text="DEPARTAMENTO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=19, column=3, padx=5, pady=5, sticky="e")
-entrada_departamento_contrato = ttk.Entry(root, style="Rounded.TEntry")
+entrada_departamento_contrato = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14))
 entrada_departamento_contrato.grid(row=19, column=4, padx=5, pady=5, sticky="ew")
 
-tk.Label(root, text="CIUDAD:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=19, column=1, padx=5, pady=5, sticky="e")
-entrada_ciudad_contrato = ttk.Entry(root, style="Rounded.TEntry")
+tk.Label(root, text="MUNICIPIO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=19, column=1, padx=5, pady=5, sticky="e")
+entrada_ciudad_contrato = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14))
 entrada_ciudad_contrato.grid(row=19, column=2, padx=5, pady=5, sticky="ew")
 
 root.grid_rowconfigure(21, minsize=20)
