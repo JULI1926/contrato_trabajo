@@ -173,6 +173,14 @@ root = tk.Tk()
 root.configure(bg='#b0d4ec')
 root.title("CONTRATO DE TRABAJO AYUDA SOCIAL Y LABORAL")
 
+# Estilo personalizado para tttk.Entry
+style = ttk.Style()
+style.configure("Rounded.TEntry", padding=6, relief="flat", borderwidth=2, bordercolor="#b0d4ec")
+style.map("Rounded.TEntry",
+          fieldbackground=[('readonly', '#b0d4ec'), ('focus', '#e0f7fa')],
+          background=[('active', '#b0d4ec')],
+          bordercolor=[('focus', '#b0d4ec')])
+
 # Crear un marco para agrupar los widgets
 frame = tk.Frame(root, padx=10, pady=10, bg='#b0d4ec')
 frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
@@ -189,45 +197,45 @@ vcmd = (root.register(solo_letras), '%P')
 vcmdnum = (root.register(solo_numeros), '%P')
 
 # Subtítulo Datos del Empleador
-tk.Label(root, text="DATOS DEL EMPLEADOR", font=("Helvetica", 12, "bold")).grid(row=1, column=2, columnspan=4, padx=5, pady=10)
+tk.Label(root, text="DATOS DEL EMPLEADOR", font=("Helvetica", 14, "bold")).grid(row=1, column=2, columnspan=4, padx=5, pady=10)
 
 # Datos del Empleador
-tk.Label(root, text="NOMBRE DEL EMPLEADOR", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=2, column=1, padx=5, pady=5, sticky="e")
-entrada_empleador = tk.Entry(root, validate="key", validatecommand=vcmd)
+tk.Label(root, text="NOMBRE DEL EMPLEADOR", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=2, column=1, padx=5, pady=5, sticky="e")
+entrada_empleador = ttk.Entry(root, style="Rounded.TEntry", validate="key", validatecommand=vcmd)
 entrada_empleador.grid(row=2, column=2, padx=5, pady=5, sticky="ew")
 
-tk.Label(root, text="N.I.T EMPLEADOR:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=2, column=3, padx=5, pady=5, sticky="e")
-entrada_nit = tk.Entry(root)
+tk.Label(root, text="N.I.T EMPLEADOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=2, column=3, padx=5, pady=5, sticky="e")
+entrada_nit = ttk.Entry(root, style="Rounded.TEntry")
 entrada_nit.grid(row=2, column=4, padx=5, pady=5, sticky="ew")
 
 # Espaciado entre filas
 root.grid_rowconfigure(3, minsize=20)
 
 # Subtítulo Datos del Representante Legal
-tk.Label(root, text="DATOS DEL REPRESENTANTE LEGAL", font=("Helvetica", 11, "bold")).grid(row=4, column=2, columnspan=4, padx=5, pady=10)
+tk.Label(root, text="DATOS DEL REPRESENTANTE LEGAL", font=("Helvetica", 16, "bold")).grid(row=4, column=2, columnspan=4, padx=5, pady=10)
 
 # Datos del Representante Legal
-tk.Label(root, text="REPRESENTANTE LEGAL:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=5, column=1, padx=5, pady=5, sticky="e")
-entrada_representante_legal = tk.Entry(root, validate="key", validatecommand=vcmd)
+tk.Label(root, text="REPRESENTANTE LEGAL:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=5, column=1, padx=5, pady=5, sticky="e")
+entrada_representante_legal = ttk.Entry(root, style="Rounded.TEntry", validate="key", validatecommand=vcmd)
 entrada_representante_legal.grid(row=5, column=2, padx=5, pady=5, sticky="ew")
 
-tk.Label(root, text="CC REPRESENTANTE LEGAL:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=5, column=3, padx=5, pady=5, sticky="e")
-entrada_cc_representante_legal = tk.Entry(root, validate="key", validatecommand=vcmdnum)
+tk.Label(root, text="CC REPRESENTANTE LEGAL:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=5, column=3, padx=5, pady=5, sticky="e")
+entrada_cc_representante_legal = ttk.Entry(root, style="Rounded.TEntry", validate="key", validatecommand=vcmdnum)
 entrada_cc_representante_legal.grid(row=5, column=4, padx=5, pady=5, sticky="ew")
 
 # Espaciado entre filas
 root.grid_rowconfigure(6, minsize=20)
 
 # Subtítulo Datos del Trabajador
-tk.Label(root, text="DATOS DEL TRABAJADOR", font=("Helvetica", 11, "bold")).grid(row=7, column=2, columnspan=4, padx=5, pady=10)
+tk.Label(root, text="DATOS DEL TRABAJADOR", font=("Helvetica", 16, "bold")).grid(row=7, column=2, columnspan=4, padx=5, pady=10)
 
 # Datos del Trabajador
-tk.Label(root, text="NOMBRE TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=8, column=1, padx=5, pady=5, sticky="e")
-entrada_trabajador = tk.Entry(root)
+tk.Label(root, text="NOMBRE TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=8, column=1, padx=5, pady=5, sticky="e")
+entrada_trabajador = ttk.Entry(root, style="Rounded.TEntry")
 entrada_trabajador.grid(row=8, column=2, padx=5, pady=5, sticky="ew")
 
-tk.Label(root, text="CC DEL TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=8, column=3, padx=5, pady=5, sticky="e")
-entrada_cc_trabajador = tk.Entry(root)
+tk.Label(root, text="CC DEL TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=8, column=3, padx=5, pady=5, sticky="e")
+entrada_cc_trabajador = ttk.Entry(root, style="Rounded.TEntry")
 entrada_cc_trabajador.grid(row=8, column=4, padx=5, pady=5, sticky="ew")
 
 # Espaciado entre filas
@@ -236,32 +244,32 @@ root.grid_rowconfigure(9, minsize=20)
 # Fecha y lugar de Nacimiento
 tk.Label(root, text="Fecha y lugar de Nacimiento", bg='#b0d4ec', font=("Helvetica", 12, "bold")).grid(row=10, column=2, columnspan=4, padx=5, pady=10)
 
-tk.Label(root, text="Fecha de Nacimiento:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=11, column=1, padx=5, pady=5, sticky="e")
-fecha_nacimiento = DateEntry(root, date_pattern='dd/MM/yyyy')
+tk.Label(root, text="Fecha de Nacimiento:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=11, column=1, padx=5, pady=5, sticky="e")
+fecha_nacimiento = DateEntry(root, style="Rounded.TEntry", date_pattern='dd/MM/yyyy')
 fecha_nacimiento.grid(row=11, column=2, padx=5, pady=5, sticky="ew")
 
-tk.Label(root, text="DEPARTAMENTO:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=11, column=3, padx=5, pady=5, sticky="e")
-entrada_departamento = tk.Entry(root)
+tk.Label(root, text="DEPARTAMENTO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=11, column=3, padx=5, pady=5, sticky="e")
+entrada_departamento = ttk.Entry(root, style="Rounded.TEntry")
 entrada_departamento.grid(row=11, column=4, padx=5, pady=5, sticky="ew")
 
-tk.Label(root, text="CIUDAD:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=12, column=1, padx=5, pady=5, sticky="e")
-entrada_ciudad = tk.Entry(root)
+tk.Label(root, text="CIUDAD:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=12, column=1, padx=5, pady=5, sticky="e")
+entrada_ciudad = ttk.Entry(root, style="Rounded.TEntry")
 entrada_ciudad.grid(row=12, column=2, padx=5, pady=5, sticky="ew")
 
-tk.Label(root, text="ESTADO CIVIL:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=12, column=3, padx=5, pady=5, sticky="e")
+tk.Label(root, text="ESTADO CIVIL:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=12, column=3, padx=5, pady=5, sticky="e")
 estado_civil = ttk.Combobox(root, values=["SOLTERO", "SOLTERA", "CASADO", "CASADA", "VIUDO", "VIUDA", "SEPARADO", "SEPARADA", "UNION LIBRE"], state="readonly")
 estado_civil.set("SOLTERO")  # Valor por defecto
 estado_civil.grid(row=12, column=4, padx=5, pady=5, sticky="ew")
 
 # Dirección
-tk.Label(root, text="Dirección", bg='#b0d4ec', font=("Helvetica", 12, "bold")).grid(row=13, column=2, columnspan=4, padx=5, pady=10)
+tk.Label(root, text="Dirección y Teléfono", bg='#b0d4ec', font=("Helvetica", 12, "bold")).grid(row=13, column=2, columnspan=4, padx=5, pady=10)
 
-tk.Label(root, text="DIRECCIÓN:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=14, column=1, padx=5, pady=5, sticky="e")
-entrada_direccion = tk.Entry(root)
+tk.Label(root, text="DIRECCIÓN:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=14, column=1, padx=5, pady=5, sticky="e")
+entrada_direccion = ttk.Entry(root, style="Rounded.TEntry")
 entrada_direccion.grid(row=14, column=2, padx=5, pady=5, sticky="ew")
 
-tk.Label(root, text="TELÉFONO:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=14, column=3, padx=5, pady=5, sticky="e")
-entrada_telefono = tk.Entry(root)
+tk.Label(root, text="TELÉFONO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=14, column=3, padx=5, pady=5, sticky="e")
+entrada_telefono = ttk.Entry(root, style="Rounded.TEntry")
 entrada_telefono.grid(row=14, column=4, padx=5, pady=5, sticky="ew")
 
 root.grid_rowconfigure(15, minsize=20)
@@ -269,23 +277,23 @@ root.grid_rowconfigure(15, minsize=20)
 # Datos del Contrato
 tk.Label(root, text="DATOS DEL CONTRATO", font=("Helvetica", 12, "bold")).grid(row=16, column=2, columnspan=4, padx=5, pady=10)
 
-tk.Label(root, text="CARGO QUE DESEMPEÑARÁ:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=17, column=1, padx=5, pady=5, sticky="e")
-entrada_cargo = tk.Entry(root)
+tk.Label(root, text="CARGO QUE DESEMPEÑARÁ:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=17, column=1, padx=5, pady=5, sticky="e")
+entrada_cargo = ttk.Entry(root, style="Rounded.TEntry")
 entrada_cargo.grid(row=17, column=2, padx=5, pady=5, sticky="ew")
 
-tk.Label(root, text="SALARIO DEL TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=17, column=3, padx=5, pady=5, sticky="e")
-salario_trabajador = tk.Entry(root)
+tk.Label(root, text="SALARIO DEL TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=17, column=3, padx=5, pady=5, sticky="e")
+salario_trabajador = ttk.Entry(root, style="Rounded.TEntry")
 salario_trabajador.grid(row=17, column=4, padx=5, pady=5, sticky="ew")
 
 # Espaciado entre filas
 root.grid_rowconfigure(18, minsize=20)
 
-tk.Label(root, text="DEPARTAMENTO:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=19, column=3, padx=5, pady=5, sticky="e")
-entrada_departamento_contrato = tk.Entry(root)
+tk.Label(root, text="DEPARTAMENTO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=19, column=3, padx=5, pady=5, sticky="e")
+entrada_departamento_contrato = ttk.Entry(root, style="Rounded.TEntry")
 entrada_departamento_contrato.grid(row=19, column=4, padx=5, pady=5, sticky="ew")
 
-tk.Label(root, text="CIUDAD:", bg='#b0d4ec', font=("Helvetica", 10, "bold italic")).grid(row=19, column=1, padx=5, pady=5, sticky="e")
-entrada_ciudad_contrato = tk.Entry(root)
+tk.Label(root, text="CIUDAD:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=19, column=1, padx=5, pady=5, sticky="e")
+entrada_ciudad_contrato = ttk.Entry(root, style="Rounded.TEntry")
 entrada_ciudad_contrato.grid(row=19, column=2, padx=5, pady=5, sticky="ew")
 
 root.grid_rowconfigure(21, minsize=20)
