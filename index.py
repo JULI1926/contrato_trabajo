@@ -108,50 +108,78 @@ def reemplazar_salario_en_documento(doc_path, salario):
 
     return reemplazos
     
-    '''
-    # Cargar el documento
-    documento = Document(doc_path)
     
-    # Verificar que el documento se ha cargado correctamente
-    print("Documento cargado correctamente.")
-    
-    # Reemplazar el texto en el documento
-    reemplazar_texto_en_documento(documento, reemplazos)
-    
-    '''
-
-
-'''
-    # Reemplazar texto en tablas
-    for tabla in documento.tables:
-        for fila in tabla.rows:
-            for celda in fila.cells:
-                for parrafo in celda.paragraphs:
-                    for run in parrafo.runs:
-                        for clave, valor in reemplazos.items():
-                            if clave in run.text:
-                                print(f"Reemplazando {clave} con {valor} en una celda")
-                                run.text = run.text.replace(clave, valor)
-                                run.font.color.rgb = RGBColor(0, 0, 0)  # Establecer el color del texto a negro
-                            else:
-                                print(f"No se encontró {clave} en la celda: {run.text}")
-
-    documento.save("documento_modificado.docx")
-'''
-
 def reemplazar_texto():
     global archivo_cargado
-    salario = int(salario_trabajador.get().replace('.', ''))
+
+    # Inicializar la lista de campos faltantes
+    campos_faltantes = []
+
+    # Verificar si el campo de salario no está vacío
+    salario_text = salario_trabajador.get().replace('.', '')
+    if not salario_text:
+        campos_faltantes.append("Salario")
+    else:
+        try:
+            salario = int(salario_text)
+        except ValueError:
+            messagebox.showwarning("Advertencia", "El valor del salario no es válido.")
+            return
+
     if archivo_cargado:
         documento = Document(archivo_cargado)
         fecha = fecha_nacimiento.get_date()
 
-        # Obtener los reemplazos de salario
-        reemplazos_salario = reemplazar_salario_en_documento(archivo_cargado, salario)   
-
+        # Obtener los reemplazos de salario solo si salario está definido
+        if 'salario' in locals():
+            reemplazos_salario = reemplazar_salario_en_documento(archivo_cargado, salario)
+        else:
+            reemplazos_salario = {}
 
         locale.setlocale(locale.LC_TIME, 'es_ES')  # Establecer el locale en español
-        
+
+        # Verificar cada campo
+        if not entrada_empleador.get():
+            campos_faltantes.append("Empleador")
+        if not entrada_nit.get():
+            campos_faltantes.append("N.I.T")
+        if not entrada_representante_legal.get():
+            campos_faltantes.append("Representante Legal")
+        if not entrada_cc_representante_legal.get():
+            campos_faltantes.append("C.C. Representante Legal")
+        if not entrada_trabajador.get():
+            campos_faltantes.append("Trabajador")
+        if not entrada_cc_trabajador.get():
+            campos_faltantes.append("C.C. Trabajador")
+        if not entrada_ciudad.get():
+            campos_faltantes.append("Ciudad")
+        if not entrada_departamento.get():
+            campos_faltantes.append("Departamento")
+        if not estado_civil.get():
+            campos_faltantes.append("Estado Civil")
+        if not entrada_direccion.get():
+            campos_faltantes.append("Dirección")
+        if not entrada_telefono.get():
+            campos_faltantes.append("Teléfono")
+        if not entrada_cargo.get():
+            campos_faltantes.append("Cargo")
+        if not entrada_ciudad_contrato.get():
+            campos_faltantes.append("Ciudad Contrato")
+        if not entrada_departamento_contrato.get():
+            campos_faltantes.append("Departamento Contrato")
+        if not jornada_trabajo.get():
+            campos_faltantes.append("Jornada")
+        if not termino_contrato.get():
+            campos_faltantes.append("Término del Contrato")
+        if not fecha_inicio_contrato.get_date():
+            campos_faltantes.append("Fecha de Inicio del Contrato")
+
+        # Si hay campos faltantes, mostrar una alerta y no realizar los reemplazos
+        if campos_faltantes:
+            mensaje_error = "Los siguientes campos están vacíos:\n" + "\n".join(campos_faltantes)
+            tk.messagebox.showerror("Error", mensaje_error)
+            return
+
         reemplazos = {
             "[Empleador]": entrada_empleador.get(),
             "[N.I.T]": entrada_nit.get(),
@@ -167,9 +195,12 @@ def reemplazar_texto():
             "[ESTADO CIVIL]": estado_civil.get(),           
             "[DIRECCION]": entrada_direccion.get(),  
             "[TELEFONO]": entrada_telefono.get(), 
-            "[CARGO]": entrada_cargo.get()
-            
-            
+            "[CARGO]": entrada_cargo.get(),
+            "[CIUDAD CONTRATO]": entrada_ciudad_contrato.get(),
+            "[DEPARTAMENTO CONTRATO]": entrada_departamento_contrato.get(),
+            "[JORNADA]": jornada_trabajo.get(),
+            "[TERMINO]": termino_contrato.get(),
+            "[FECHA_INICIO]": fecha_inicio_contrato.get_date().strftime('%d de %B del %Y').upper()
         }
 
         # Combinar los diccionarios de reemplazos
@@ -192,6 +223,8 @@ def reemplazar_texto():
             messagebox.showwarning("Advertencia", "No se ha guardado el documento.")
     else:
         messagebox.showwarning("Advertencia", "No se ha cargado ningún documento.")
+
+
 
 
 root = tk.Tk()
@@ -241,11 +274,11 @@ tk.Label(root, text="DATOS DEL REPRESENTANTE LEGAL", font=("Helvetica", 16, "bol
 
 # Datos del Representante Legal
 tk.Label(root, text="REPRESENTANTE LEGAL:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=5, column=1, padx=5, pady=5, sticky="e")
-entrada_representante_legal = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14), validate="key", validatecommand=vcmd)
+entrada_representante_legal = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14), validate="key")
 entrada_representante_legal.grid(row=5, column=2, padx=5, pady=5, sticky="ew")
 
 tk.Label(root, text="CC REPRESENTANTE LEGAL:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=5, column=3, padx=5, pady=5, sticky="e")
-entrada_cc_representante_legal = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14), validate="key", validatecommand=vcmdnum)
+entrada_cc_representante_legal = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14), validate="key")
 entrada_cc_representante_legal.grid(row=5, column=4, padx=5, pady=5, sticky="ew")
 
 # Espaciado entre filas
@@ -276,7 +309,9 @@ fecha_nacimiento.insert(0, "dd/MM/AAAA")
 fecha_nacimiento.grid(row=11, column=2, padx=5, pady=5, sticky="ew")
 
 
-def autompletar_municipios(departamentos, municipios_por_departamento):  
+def autompletar_municipios(departamentos, municipios_por_departamento): 
+
+    global entrada_departamento, entrada_ciudad 
     
     # Función para actualizar el combobox de municipios cuando cambie el departamento
     def actualizar_municipios(event):
@@ -330,7 +365,7 @@ entrada_telefono.grid(row=14, column=4, padx=5, pady=5, sticky="ew")
 root.grid_rowconfigure(15, minsize=20)
 
 # Datos del Contrato
-tk.Label(root, text="DATOS DEL CONTRATO", font=("Helvetica", 12, "bold")).grid(row=16, column=2, columnspan=4, padx=5, pady=10)
+tk.Label(root, text="DATOS DEL CONTRATO", font=("Helvetica", 16, "bold")).grid(row=16, column=2, columnspan=4, padx=5, pady=10)
 
 tk.Label(root, text="CARGO QUE DESEMPEÑARÁ:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=17, column=1, padx=5, pady=5, sticky="e")
 entrada_cargo = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14))
@@ -343,27 +378,73 @@ salario_trabajador.grid(row=17, column=4, padx=5, pady=5, sticky="ew")
 # Espaciado entre filas
 root.grid_rowconfigure(18, minsize=20)
 
-tk.Label(root, text="DEPARTAMENTO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=19, column=3, padx=5, pady=5, sticky="e")
-entrada_departamento_contrato = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14))
-entrada_departamento_contrato.grid(row=19, column=4, padx=5, pady=5, sticky="ew")
 
-tk.Label(root, text="MUNICIPIO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=19, column=1, padx=5, pady=5, sticky="e")
-entrada_ciudad_contrato = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14))
-entrada_ciudad_contrato.grid(row=19, column=2, padx=5, pady=5, sticky="ew")
 
-root.grid_rowconfigure(21, minsize=20)
+def autompletar_municipios_contrato(departamentos, municipios_por_departamento):  
+    global entrada_departamento_contrato, entrada_ciudad_contrato
+    
+    # Función para actualizar el combobox de municipios cuando cambie el departamento
+    def actualizar_municipios(event):
+        departamento_seleccionado = entrada_departamento_contrato.get()
+        entrada_ciudad_contrato["values"] = municipios_por_departamento.get(departamento_seleccionado, [])
+        entrada_ciudad_contrato.set('')  # Limpiar la selección de municipio al cambiar el departamento
+
+    # Label y combobox para el departamento
+    tk.Label(root, text="DEPARTAMENTO DE LABOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=19, column=1, padx=5, pady=5, sticky="e")
+    entrada_departamento_contrato = ttk.Combobox(root, values=departamentos, font=("Helvetica", 14))
+    entrada_departamento_contrato.grid(row=19, column=2, padx=5, pady=5, sticky="ew")
+    entrada_departamento_contrato.bind("<<ComboboxSelected>>", actualizar_municipios)
+
+    # Label y combobox para el municipio
+    tk.Label(root, text="MUNICIPIO DE LABOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=19, column=3, padx=5, pady=5, sticky="e")
+    entrada_ciudad_contrato = ttk.Combobox(root, font=("Helvetica", 14))
+    entrada_ciudad_contrato.grid(row=19, column=4, padx=5, pady=5, sticky="ew")
+
+def main():
+    # Cargar y procesar los datos JSON
+    datos_json = cargar_datos_json('ruta/al/archivo.json')
+    departamentos, municipios_por_departamento = procesar_datos(datos_json)
+
+    # Inicializar la interfaz
+    autompletar_municipios_contrato(departamentos, municipios_por_departamento)
+
+if __name__ == "__main__":
+    main()
+
+
+root.grid_rowconfigure(20, minsize=20)
+
+tk.Label(root, text="JORNADA DE TRABAJO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=21, column=1, padx=5, pady=5, sticky="e")
+jornada_trabajo = ttk.Combobox(root, values=["TIEMPO COMPLETO", "MEDIO TIEMPO", "POR HORAS", "AL DESTAJO"], state="readonly")
+jornada_trabajo.set("Seleccione una opción ...")  # Valor por defecto
+jornada_trabajo.grid(row=21, column=2, padx=5, pady=5, sticky="ew")
+
+
+tk.Label(root, text="TÉRMINO DEL CONTRATO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=21, column=3, padx=5, pady=5, sticky="e")
+termino_contrato = ttk.Combobox(root, values=["INDEFINIDO", "A TÉRMINO FIJO", "POR DURACION DE OBRA O LABOR"], state="readonly")
+termino_contrato.set("Seleccione una opción ...")  # Valor por defecto
+termino_contrato.grid(row=21, column=4, padx=5, pady=5, sticky="ew")
+
+# Espaciado entre filas
+root.grid_rowconfigure(22, minsize=20)
+
+tk.Label(root, text="Fecha de Inicio de Contrato:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=23, column=1, padx=5, pady=5, sticky="e")
+fecha_inicio_contrato = DateEntry(root, style="Rounded.TEntry", font=("Helvetica", 14), date_pattern='dd/MM/yyyy')
+fecha_inicio_contrato.delete(0, "end")
+fecha_inicio_contrato.insert(0, "dd/MM/AAAA")
+fecha_inicio_contrato.grid(row=23, column=2, padx=5, pady=5, sticky="ew")
 
 # Cargar el documento
 cargar_btn = tk.Button(root, text="Cargar Documento", command=cargar_documento)
-cargar_btn.grid(row=22, column=2, columnspan=2, pady=10, sticky="ew")
+cargar_btn.grid(row=24, column=2, columnspan=2, pady=10, sticky="ew")
 
 # Botón para reemplazar el texto
 reemplazar_btn = tk.Button(root, text="Reemplazar Texto", command=reemplazar_texto)
-reemplazar_btn.grid(row=23, column=2, columnspan=2, pady=10, sticky="ew")
+reemplazar_btn.grid(row=25, column=2, columnspan=2, pady=10, sticky="ew")
 
 # Crear y colocar el Label para mostrar el archivo cargado
 archivo_label = tk.Label(root, text="No se ha cargado ningún documento.")
-archivo_label.grid(row=24, column=2, columnspan=2, pady=10, sticky="ew")
+archivo_label.grid(row=26, column=2, columnspan=2, pady=10, sticky="ew")
 
 # Cargar el documento por defecto al iniciar la aplicación
 cargar_documento_por_defecto()
