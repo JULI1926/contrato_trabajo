@@ -9,6 +9,9 @@ import locale
 import json
 import os
 
+# Definir las variables de reemplazo como globales
+reemplazos = {}
+
 # Variable global para almacenar la ruta del archivo cargado
 archivo_cargado = None
 
@@ -91,7 +94,11 @@ def reemplazar_texto_en_documento(documento, reemplazos):
                                 run.text = run.text.replace(clave, valor)
                                 run.font.color.rgb = RGBColor(0, 0, 0)  # Establecer el color del texto a negro
                                 
-    documento.save("documento_modificado.docx")
+    
+
+                                
+    nombre_archivo = f"Contrato de Trabajo {reemplazos['[TERMINO]']} de {reemplazos['[TRABAJADOR]']}.docx"
+    documento.save(nombre_archivo)
 
 
 
@@ -111,6 +118,7 @@ def reemplazar_salario_en_documento(doc_path, salario):
     
 def reemplazar_texto():
     global archivo_cargado
+    global reemplazos
 
     # Inicializar la lista de campos faltantes
     campos_faltantes = []
@@ -196,8 +204,8 @@ def reemplazar_texto():
             "[DIRECCION]": entrada_direccion.get(),  
             "[TELEFONO]": entrada_telefono.get(), 
             "[CARGO]": entrada_cargo.get(),
-            "[CIUDAD CONTRATO]": entrada_ciudad_contrato.get(),
-            "[DEPARTAMENTO CONTRATO]": entrada_departamento_contrato.get(),
+            "[CD_CONT]": entrada_ciudad_contrato.get(),
+            "[DPTO_CONT]": entrada_departamento_contrato.get(),
             "[JORNADA]": jornada_trabajo.get(),
             "[TERMINO]": termino_contrato.get(),
             "[FECHA_INICIO]": fecha_inicio_contrato.get_date().strftime('%d de %B del %Y').upper()
