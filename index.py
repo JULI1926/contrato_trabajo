@@ -145,6 +145,7 @@ def reemplazar_salario_en_documento(doc_path, salario):
     return reemplazos
     
 def calcular_fecha_fin(fecha_inicio, duracion):
+    locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
     fecha_inicio_dt = datetime.strptime(fecha_inicio, '%d/%m/%Y')
     fecha_fin_dt = fecha_inicio_dt + timedelta(days=duracion)
     return fecha_fin_dt.strftime('%d de %B del %Y').upper()
