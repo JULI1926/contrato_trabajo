@@ -5,6 +5,7 @@ from docx import Document
 from tkcalendar import DateEntry
 from docx.shared import RGBColor
 from num2words import num2words
+from datetime import datetime, timedelta
 import locale
 import json
 import os
@@ -37,21 +38,25 @@ def procesar_datos(datos_json):
 
     return departamentos, municipios_por_departamento
 
+salario_inicial = None
+
 def actualizar_salario(event):
-    try:
-        salario = int(salario_trabajador.get())
-    except ValueError:
-        salario = 0
+    global salario_inicial
+    if salario_inicial is None:
+        try:
+            salario_inicial = int(salario_trabajador.get())
+        except ValueError:
+            salario_inicial = 0
 
     seleccion = jornada_trabajo.get()
     if seleccion == "TIEMPO COMPLETO":
-        nuevo_salario = salario
+        nuevo_salario = salario_inicial
     elif seleccion == "MEDIO TIEMPO":
-        nuevo_salario = salario / 2
+        nuevo_salario = salario_inicial // 2
     elif seleccion == "POR HORAS":
-        nuevo_salario = salario / 230
+        nuevo_salario = salario_inicial // 230
     else:
-        nuevo_salario = salario
+        nuevo_salario = salario_inicial
 
     salario_trabajador.delete(0, tk.END)
     salario_trabajador.insert(0, f"{nuevo_salario}")
@@ -126,7 +131,7 @@ def reemplazar_salario_en_documento(doc_path, salario):
     if jornada_trabajo.get() == "POR HORAS":
     #"TIEMPO COMPLETO", "MEDIO TIEMPO", "POR HORAS"
         salario_palabras = num2words(salario, lang='es').replace('coma', 'mil')
-        salario_texto = f"{salario:,} ({salario_palabras.upper()} POR HORA.)"
+        salario_texto = f"{salario:,} ({salario_palabras.upper()} PESOS M/CTE POR HORA.)"
     else:
         salario_palabras = num2words(salario, lang='es').replace('coma', 'mil')
         salario_texto = f"{salario:,} ({salario_palabras.upper()} PESOS M/CTE MENSUAL.)"
@@ -139,10 +144,44 @@ def reemplazar_salario_en_documento(doc_path, salario):
 
     return reemplazos
     
-    
+def calcular_fecha_fin(fecha_inicio, duracion):
+    fecha_inicio_dt = datetime.strptime(fecha_inicio, '%d/%m/%Y')
+    fecha_fin_dt = fecha_inicio_dt + timedelta(days=duracion)
+    return fecha_fin_dt.strftime('%d de %B del %Y').upper()
+
+
+
+def deshabilitar_duracion_contrato(event):
+    selected_option = termino_contrato.get()
+    if selected_option in ["INDEFINIDO", "POR DURACION DE OBRA O LABOR"]:
+        entrada_duracion_contrato.grid_remove()  # Oculta el campo
+        # entrada_duracion_contrato.config(state='disabled')  # Alternativa: Deshabilita el campo
+    else:
+        entrada_duracion_contrato.grid()  # Muestra el campo
+        # entrada_duracion_contrato.config(state='normal')  # Alternativa: Habilita el campo
+
+
+
 def reemplazar_texto():
     global archivo_cargado
     global reemplazos
+    
+    fecha_inicio = fecha_inicio_contrato.get()
+    
+     # Inicializar la duración solo si el término del contrato es "A TÉRMINO FIJO"
+    if termino_contrato.get() == "A TÉRMINO FIJO":
+        if entrada_duracion_contrato.winfo_ismapped():
+            duracion_texto = entrada_duracion_contrato.get()
+            if duracion_texto:
+                duracion = int(duracion_texto)
+            else:
+                duracion = 0  # O cualquier valor predeterminado que desees usar
+        else:
+            duracion = 0  # O cualquier valor predeterminado que desees usar
+        fecha_fin = calcular_fecha_fin(fecha_inicio, duracion)
+    else:
+        fecha_fin = ""  # O cualquier valor predeterminado que desees usar
+    
 
     # Inicializar la lista de campos faltantes
     campos_faltantes = []
@@ -233,6 +272,7 @@ def reemplazar_texto():
             "[JORNADA]": jornada_trabajo.get(),
             "[TERMINO]": termino_contrato.get(),
             "[FECHA_INICIO]": fecha_inicio_contrato.get_date().strftime('%d de %B del %Y').upper(),
+            "[FECHA_FIN]": fecha_fin,
 
         }
 
@@ -458,6 +498,7 @@ tk.Label(root, text="TÉRMINO DEL CONTRATO:", bg='#b0d4ec', font=("Helvetica", 1
 termino_contrato = ttk.Combobox(root, values=["INDEFINIDO", "A TÉRMINO FIJO", "POR DURACION DE OBRA O LABOR"], state="readonly")
 termino_contrato.set("Seleccione una opción ...")  # Valor por defecto
 termino_contrato.grid(row=21, column=4, padx=5, pady=5, sticky="ew")
+termino_contrato.bind("<<ComboboxSelected>>", deshabilitar_duracion_contrato)
 
 # Espaciado entre filas
 root.grid_rowconfigure(22, minsize=20)
@@ -467,6 +508,11 @@ fecha_inicio_contrato = DateEntry(root, style="Rounded.TEntry", font=("Helvetica
 fecha_inicio_contrato.delete(0, "end")
 fecha_inicio_contrato.insert(0, "dd/MM/AAAA")
 fecha_inicio_contrato.grid(row=23, column=2, padx=5, pady=5, sticky="ew")
+
+ # Label y combobox para el municipio
+tk.Label(root, text="DURACION DEL CONTRATO (EN DIAS):", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=23, column=3, padx=5, pady=5, sticky="e")
+entrada_duracion_contrato = ttk.Entry(root, font=("Helvetica", 14))
+entrada_duracion_contrato.grid(row=23, column=4, padx=5, pady=5, sticky="ew")
 
 # Cargar el documento
 cargar_btn = tk.Button(root, text="Cargar Documento", command=cargar_documento)
