@@ -37,6 +37,25 @@ def procesar_datos(datos_json):
 
     return departamentos, municipios_por_departamento
 
+def actualizar_salario(event):
+    try:
+        salario = int(salario_trabajador.get())
+    except ValueError:
+        salario = 0
+
+    seleccion = jornada_trabajo.get()
+    if seleccion == "TIEMPO COMPLETO":
+        nuevo_salario = salario
+    elif seleccion == "MEDIO TIEMPO":
+        nuevo_salario = salario / 2
+    elif seleccion == "POR HORAS":
+        nuevo_salario = salario / 230
+    else:
+        nuevo_salario = salario
+
+    salario_trabajador.delete(0, tk.END)
+    salario_trabajador.insert(0, f"{nuevo_salario}")
+
 
 
 def solo_letras(char):
@@ -104,8 +123,13 @@ def reemplazar_texto_en_documento(documento, reemplazos):
 
 def reemplazar_salario_en_documento(doc_path, salario):
     # Convierte el salario a palabras
-    salario_palabras = num2words(salario, lang='es').replace('coma', 'mil')
-    salario_texto = f"{salario:,} ({salario_palabras.upper()} PESOS M/CTE.)"
+    if jornada_trabajo.get() == "POR HORAS":
+    #"TIEMPO COMPLETO", "MEDIO TIEMPO", "POR HORAS"
+        salario_palabras = num2words(salario, lang='es').replace('coma', 'mil')
+        salario_texto = f"{salario:,} ({salario_palabras.upper()} POR HORA.)"
+    else:
+        salario_palabras = num2words(salario, lang='es').replace('coma', 'mil')
+        salario_texto = f"{salario:,} ({salario_palabras.upper()} PESOS M/CTE MENSUAL.)"
     
     # Diccionario de reemplazos
     reemplazos = {"[SALARIO]": salario_texto}
@@ -208,7 +232,8 @@ def reemplazar_texto():
             "[DPTO_CONT]": entrada_departamento_contrato.get(),
             "[JORNADA]": jornada_trabajo.get(),
             "[TERMINO]": termino_contrato.get(),
-            "[FECHA_INICIO]": fecha_inicio_contrato.get_date().strftime('%d de %B del %Y').upper()
+            "[FECHA_INICIO]": fecha_inicio_contrato.get_date().strftime('%d de %B del %Y').upper(),
+
         }
 
         # Combinar los diccionarios de reemplazos
@@ -423,9 +448,10 @@ if __name__ == "__main__":
 root.grid_rowconfigure(20, minsize=20)
 
 tk.Label(root, text="JORNADA DE TRABAJO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=21, column=1, padx=5, pady=5, sticky="e")
-jornada_trabajo = ttk.Combobox(root, values=["TIEMPO COMPLETO", "MEDIO TIEMPO", "POR HORAS", "AL DESTAJO"], state="readonly")
+jornada_trabajo = ttk.Combobox(root, values=["TIEMPO COMPLETO", "MEDIO TIEMPO", "POR HORAS"], state="readonly")
 jornada_trabajo.set("Seleccione una opción ...")  # Valor por defecto
 jornada_trabajo.grid(row=21, column=2, padx=5, pady=5, sticky="ew")
+jornada_trabajo.bind("<<ComboboxSelected>>", actualizar_salario)
 
 
 tk.Label(root, text="TÉRMINO DEL CONTRATO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=21, column=3, padx=5, pady=5, sticky="e")
