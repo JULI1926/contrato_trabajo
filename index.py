@@ -274,6 +274,7 @@ def reemplazar_texto():
             "[TERMINO]": termino_contrato.get().upper(),
             "[FECHA_INICIO]": fecha_inicio_contrato.get_date().strftime('%d de %B del %Y').upper(),
             "[FECHA_FIN]": fecha_fin.upper(),
+            "[FECHA_FIRMA]": fecha_firma_contrato.get_date().strftime('%d de %B del %Y').upper(),
 
         }
 
@@ -302,10 +303,11 @@ def reemplazar_texto():
 
 
 root = tk.Tk()
+#root.geometry("1920x1080")
 root.configure(bg='#b0d4ec')
 root.title("CONTRATO DE TRABAJO AYUDA SOCIAL Y LABORAL")
 
-# Estilo personalizado para tttk.Entry
+# Estilo personalizado para ttk.Entry
 style = ttk.Style()
 style.configure("Rounded.TEntry", padding=6, relief="flat", borderwidth=2, bordercolor="#b0d4ec")
 style.map("Rounded.TEntry",
@@ -313,15 +315,47 @@ style.map("Rounded.TEntry",
           background=[('active', '#b0d4ec')],
           bordercolor=[('focus', '#b0d4ec')])
 
-# Crear un marco para agrupar los widgets
-frame = tk.Frame(root, padx=10, pady=10, bg='#b0d4ec')
-frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+# Crear un Frame contenedor para el Canvas y el Scrollbar
+contenedor = tk.Frame(root, bg='#b0d4ec')
+contenedor.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+
+# Crear un Canvas
+canvas = tk.Canvas(contenedor, bg='#b0d4ec')
+canvas.pack(side="left", fill="both", expand=True)
+
+# Añadir un Scrollbar al Canvas
+scrollbar = ttk.Scrollbar(contenedor, orient="vertical", command=canvas.yview)
+scrollbar.pack(side="right", fill="y")
+
+# Configurar el Canvas para usar el Scrollbar
+canvas.configure(yscrollcommand=scrollbar.set)
+canvas.bind('<Configure>', lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+
+# Crear otro Frame dentro del Canvas
+frame_con_scroll = tk.Frame(canvas, bg='#b0d4ec')
+canvas.create_window((0, 0), window=frame_con_scroll, anchor="nw")
+
+# Crear un Frame adicional para centrar el contenido
+frame_centrado = tk.Frame(frame_con_scroll, bg='#b0d4ec')
+frame_centrado.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+
+# # Crear un marco para agrupar los widgets dentro del Frame con scroll
+# frame = tk.Frame(frame_con_scroll, padx=10, pady=10, bg='#b0d4ec')
+# frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+
+
+# Función para el desplazamiento con la rueda del mouse
+def _on_mouse_wheel(event):
+    canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+
+canvas.bind_all("<MouseWheel>", _on_mouse_wheel)
 
 # Configurar las columnas y filas para que se expandan
-for i in range(6):
-    root.grid_columnconfigure(i, weight=1)
-for i in range(21):
-    root.grid_rowconfigure(i, weight=1)
+for i in range(10):
+    frame_con_scroll.grid_columnconfigure(i, weight=1)
+for i in range(40):
+    frame_con_scroll.grid_rowconfigure(i, weight=1)
 
 
 # Registrar la función de validación
@@ -329,55 +363,55 @@ vcmd = (root.register(solo_letras), '%P')
 vcmdnum = (root.register(solo_numeros), '%P')
 
 # Subtítulo Datos del Empleador
-tk.Label(root, text="DATOS DEL EMPLEADOR", font=("Helvetica", 14, "bold")).grid(row=1, column=2, columnspan=4, padx=5, pady=10)
+tk.Label(frame_con_scroll, text="DATOS DEL EMPLEADOR", font=("Helvetica", 14, "bold")).grid(row=1, column=2, columnspan=4, padx=5, pady=10)
 
 # Datos del Empleador
-tk.Label(root, text="NOMBRE DEL EMPLEADOR", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=2, column=1, padx=5, pady=5, sticky="e")
-entrada_empleador = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14), validate="key")
+tk.Label(frame_con_scroll, text="NOMBRE DEL EMPLEADOR", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=2, column=1, padx=5, pady=5, sticky="e")
+entrada_empleador = ttk.Entry(frame_con_scroll, style="Rounded.TEntry", font=("Helvetica", 14), validate="key")
 entrada_empleador.grid(row=2, column=2, padx=5, pady=5, sticky="ew")
 
-tk.Label(root, text="N.I.T EMPLEADOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=2, column=3, padx=5, pady=5, sticky="e")
-entrada_nit = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14))
+tk.Label(frame_con_scroll, text="N.I.T EMPLEADOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=2, column=3, padx=5, pady=5, sticky="e")
+entrada_nit = ttk.Entry(frame_con_scroll, style="Rounded.TEntry", font=("Helvetica", 14))
 entrada_nit.grid(row=2, column=4, padx=5, pady=5, sticky="ew")
 
 # Espaciado entre filas
 root.grid_rowconfigure(3, minsize=20)
 
 # Subtítulo Datos del Representante Legal
-tk.Label(root, text="DATOS DEL REPRESENTANTE LEGAL", font=("Helvetica", 16, "bold")).grid(row=4, column=2, columnspan=4, padx=5, pady=10)
+tk.Label(frame_con_scroll, text="DATOS DEL REPRESENTANTE LEGAL", font=("Helvetica", 16, "bold")).grid(row=4, column=2, columnspan=4, padx=5, pady=10)
 
 # Datos del Representante Legal
-tk.Label(root, text="REPRESENTANTE LEGAL:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=5, column=1, padx=5, pady=5, sticky="e")
-entrada_representante_legal = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14), validate="key")
+tk.Label(frame_con_scroll, text="REPRESENTANTE LEGAL:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=5, column=1, padx=5, pady=5, sticky="e")
+entrada_representante_legal = ttk.Entry(frame_con_scroll, style="Rounded.TEntry", font=("Helvetica", 14), validate="key")
 entrada_representante_legal.grid(row=5, column=2, padx=5, pady=5, sticky="ew")
 
-tk.Label(root, text="CC REPRESENTANTE LEGAL:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=5, column=3, padx=5, pady=5, sticky="e")
-entrada_cc_representante_legal = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14), validate="key")
+tk.Label(frame_con_scroll, text="CC REPRESENTANTE LEGAL:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=5, column=3, padx=5, pady=5, sticky="e")
+entrada_cc_representante_legal = ttk.Entry(frame_con_scroll, style="Rounded.TEntry", font=("Helvetica", 14), validate="key")
 entrada_cc_representante_legal.grid(row=5, column=4, padx=5, pady=5, sticky="ew")
 
 # Espaciado entre filas
 root.grid_rowconfigure(6, minsize=20)
 
 # Subtítulo Datos del Trabajador
-tk.Label(root, text="DATOS DEL TRABAJADOR", font=("Helvetica", 16, "bold")).grid(row=7, column=2, columnspan=4, padx=5, pady=10)
+tk.Label(frame_con_scroll, text="DATOS DEL TRABAJADOR", font=("Helvetica", 16, "bold")).grid(row=7, column=2, columnspan=4, padx=5, pady=10)
 
 # Datos del Trabajador
-tk.Label(root, text="NOMBRE TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=8, column=1, padx=5, pady=5, sticky="e")
-entrada_trabajador = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14))
+tk.Label(frame_con_scroll, text="NOMBRE TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=8, column=1, padx=5, pady=5, sticky="e")
+entrada_trabajador = ttk.Entry(frame_con_scroll, style="Rounded.TEntry", font=("Helvetica", 14))
 entrada_trabajador.grid(row=8, column=2, padx=5, pady=5, sticky="ew")
 
-tk.Label(root, text="CC DEL TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=8, column=3, padx=5, pady=5, sticky="e")
-entrada_cc_trabajador = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14))
+tk.Label(frame_con_scroll, text="CC DEL TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=8, column=3, padx=5, pady=5, sticky="e")
+entrada_cc_trabajador = ttk.Entry(frame_con_scroll, style="Rounded.TEntry", font=("Helvetica", 14))
 entrada_cc_trabajador.grid(row=8, column=4, padx=5, pady=5, sticky="ew")
 
 # Espaciado entre filas
 root.grid_rowconfigure(9, minsize=20)
 
 # Fecha y lugar de Nacimiento
-tk.Label(root, text="Fecha y lugar de Nacimiento", bg='#b0d4ec', font=("Helvetica", 12, "bold")).grid(row=10, column=2, columnspan=4, padx=5, pady=10)
+tk.Label(frame_con_scroll, text="Fecha y lugar de Nacimiento", bg='#b0d4ec', font=("Helvetica", 12, "bold")).grid(row=10, column=2, columnspan=4, padx=5, pady=10)
 
-tk.Label(root, text="Fecha de Nacimiento:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=11, column=1, padx=5, pady=5, sticky="e")
-fecha_nacimiento = DateEntry(root, style="Rounded.TEntry", font=("Helvetica", 14), date_pattern='dd/MM/yyyy')
+tk.Label(frame_con_scroll, text="Fecha de Nacimiento:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=11, column=1, padx=5, pady=5, sticky="e")
+fecha_nacimiento = DateEntry(frame_con_scroll, style="Rounded.TEntry", font=("Helvetica", 14), date_pattern='dd/MM/yyyy')
 fecha_nacimiento.delete(0, "end")
 fecha_nacimiento.insert(0, "dd/MM/AAAA")
 fecha_nacimiento.grid(row=11, column=2, padx=5, pady=5, sticky="ew")
@@ -395,14 +429,14 @@ def autompletar_municipios(departamentos, municipios_por_departamento):
 
     
     # Label y combobox para el departamento
-    tk.Label(root, text="DEPARTAMENTO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=11, column=3, padx=5, pady=5, sticky="e")
-    entrada_departamento = ttk.Combobox(root, values=departamentos, font=("Helvetica", 14))
+    tk.Label(frame_con_scroll, text="DEPARTAMENTO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=11, column=3, padx=5, pady=5, sticky="e")
+    entrada_departamento = ttk.Combobox(frame_con_scroll, values=departamentos, font=("Helvetica", 14))
     entrada_departamento.grid(row=11, column=4, padx=5, pady=5, sticky="ew")
     entrada_departamento.bind("<<ComboboxSelected>>", actualizar_municipios)
 
     # Label y combobox para el municipio
-    tk.Label(root, text="MUNICIPIO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=12, column=1, padx=5, pady=5, sticky="e")
-    entrada_ciudad = ttk.Combobox(root, font=("Helvetica", 14))
+    tk.Label(frame_con_scroll, text="MUNICIPIO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=12, column=1, padx=5, pady=5, sticky="e")
+    entrada_ciudad = ttk.Combobox(frame_con_scroll, font=("Helvetica", 14))
     entrada_ciudad.grid(row=12, column=2, padx=5, pady=5, sticky="ew")
 
 def main():
@@ -420,37 +454,37 @@ if __name__ == "__main__":
 root.option_add('*TCombobox*Listbox.font', ("Helvetica", 14))
 root.option_add('*TCombobox.font', ("Helvetica", 14)) 
 
-tk.Label(root, text="ESTADO CIVIL:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=12, column=3, padx=5, pady=5, sticky="e")
-estado_civil = ttk.Combobox(root, values=["SOLTERO", "SOLTERA", "CASADO", "CASADA", "VIUDO", "VIUDA", "SEPARADO", "SEPARADA", "UNION LIBRE"], state="readonly")
+tk.Label(frame_con_scroll, text="ESTADO CIVIL:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=12, column=3, padx=5, pady=5, sticky="e")
+estado_civil = ttk.Combobox(frame_con_scroll, values=["SOLTERO", "SOLTERA", "CASADO", "CASADA", "VIUDO", "VIUDA", "SEPARADO", "SEPARADA", "UNION LIBRE"], state="readonly")
 estado_civil.set("Seleccione una opción ...")  # Valor por defecto
 estado_civil.grid(row=12, column=4, padx=5, pady=5, sticky="ew")
 
 # Dirección
-tk.Label(root, text="Dirección y Teléfono", bg='#b0d4ec', font=("Helvetica", 12, "bold")).grid(row=13, column=2, columnspan=4, padx=5, pady=10)
+tk.Label(frame_con_scroll, text="Dirección y Teléfono", bg='#b0d4ec', font=("Helvetica", 12, "bold")).grid(row=13, column=2, columnspan=4, padx=5, pady=10)
 
-tk.Label(root, text="DIRECCIÓN:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=14, column=1, padx=5, pady=5, sticky="e")
-entrada_direccion = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14))
+tk.Label(frame_con_scroll, text="DIRECCIÓN:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=14, column=1, padx=5, pady=5, sticky="e")
+entrada_direccion = ttk.Entry(frame_con_scroll, style="Rounded.TEntry", font=("Helvetica", 14))
 entrada_direccion.grid(row=14, column=2, padx=5, pady=5, sticky="ew")
 
-tk.Label(root, text="TELÉFONO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=14, column=3, padx=5, pady=5, sticky="e")
-entrada_telefono = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14))
+tk.Label(frame_con_scroll, text="TELÉFONO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=14, column=3, padx=5, pady=5, sticky="e")
+entrada_telefono = ttk.Entry(frame_con_scroll, style="Rounded.TEntry", font=("Helvetica", 14))
 entrada_telefono.grid(row=14, column=4, padx=5, pady=5, sticky="ew")
 
-tk.Label(root, text="TELÉFONO CONTACTO ADICIONAL:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=15, column=1, padx=5, pady=5, sticky="e")
-entrada_telefono = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14))
+tk.Label(frame_con_scroll, text="TELÉFONO CONTACTO ADICIONAL:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=15, column=1, padx=5, pady=5, sticky="e")
+entrada_telefono = ttk.Entry(frame_con_scroll, style="Rounded.TEntry", font=("Helvetica", 14))
 entrada_telefono.grid(row=15, column=2, padx=5, pady=5, sticky="ew")
 
 root.grid_rowconfigure(16, minsize=20)
 
 # Datos del Contrato
-tk.Label(root, text="DATOS DEL CONTRATO", font=("Helvetica", 16, "bold")).grid(row=17, column=2, columnspan=4, padx=5, pady=10)
+tk.Label(frame_con_scroll, text="DATOS DEL CONTRATO", font=("Helvetica", 16, "bold")).grid(row=17, column=2, columnspan=4, padx=5, pady=10)
 
-tk.Label(root, text="CARGO QUE DESEMPEÑARÁ:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=18, column=1, padx=5, pady=5, sticky="e")
-entrada_cargo = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14))
+tk.Label(frame_con_scroll, text="CARGO QUE DESEMPEÑARÁ:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=18, column=1, padx=5, pady=5, sticky="e")
+entrada_cargo = ttk.Entry(frame_con_scroll, style="Rounded.TEntry", font=("Helvetica", 14))
 entrada_cargo.grid(row=18, column=2, padx=5, pady=5, sticky="ew")
 
-tk.Label(root, text="SALARIO DEL TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=18, column=3, padx=5, pady=5, sticky="e")
-salario_trabajador = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14))
+tk.Label(frame_con_scroll, text="SALARIO DEL TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=18, column=3, padx=5, pady=5, sticky="e")
+salario_trabajador = ttk.Entry(frame_con_scroll, style="Rounded.TEntry", font=("Helvetica", 14))
 salario_trabajador.grid(row=18, column=4, padx=5, pady=5, sticky="ew")
 
 # Espaciado entre filas
@@ -468,14 +502,14 @@ def autompletar_municipios_contrato(departamentos, municipios_por_departamento):
         entrada_ciudad_contrato.set('')  # Limpiar la selección de municipio al cambiar el departamento
 
     # Label y combobox para el departamento
-    tk.Label(root, text="DEPARTAMENTO DE LABOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=19, column=1, padx=5, pady=5, sticky="e")
-    entrada_departamento_contrato = ttk.Combobox(root, values=departamentos, font=("Helvetica", 14))
+    tk.Label(frame_con_scroll, text="DEPARTAMENTO DE LABOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=19, column=1, padx=5, pady=5, sticky="e")
+    entrada_departamento_contrato = ttk.Combobox(frame_con_scroll, values=departamentos, font=("Helvetica", 14))
     entrada_departamento_contrato.grid(row=19, column=2, padx=5, pady=5, sticky="ew")
     entrada_departamento_contrato.bind("<<ComboboxSelected>>", actualizar_municipios)
 
     # Label y combobox para el municipio
-    tk.Label(root, text="MUNICIPIO DE LABOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=19, column=3, padx=5, pady=5, sticky="e")
-    entrada_ciudad_contrato = ttk.Combobox(root, font=("Helvetica", 14))
+    tk.Label(frame_con_scroll, text="MUNICIPIO DE LABOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=19, column=3, padx=5, pady=5, sticky="e")
+    entrada_ciudad_contrato = ttk.Combobox(frame_con_scroll, font=("Helvetica", 14))
     entrada_ciudad_contrato.grid(row=19, column=4, padx=5, pady=5, sticky="ew")
 
 def main():
@@ -492,15 +526,15 @@ if __name__ == "__main__":
 
 root.grid_rowconfigure(20, minsize=20)
 
-tk.Label(root, text="JORNADA DE TRABAJO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=21, column=1, padx=5, pady=5, sticky="e")
-jornada_trabajo = ttk.Combobox(root, values=["TIEMPO COMPLETO", "MEDIO TIEMPO", "POR HORAS"], state="readonly")
+tk.Label(frame_con_scroll, text="JORNADA DE TRABAJO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=21, column=1, padx=5, pady=5, sticky="e")
+jornada_trabajo = ttk.Combobox(frame_con_scroll, values=["TIEMPO COMPLETO", "MEDIO TIEMPO", "POR HORAS"], state="readonly")
 jornada_trabajo.set("Seleccione una opción ...")  # Valor por defecto
 jornada_trabajo.grid(row=21, column=2, padx=5, pady=5, sticky="ew")
 jornada_trabajo.bind("<<ComboboxSelected>>", actualizar_salario)
 
 
-tk.Label(root, text="TÉRMINO DEL CONTRATO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=21, column=3, padx=5, pady=5, sticky="e")
-termino_contrato = ttk.Combobox(root, values=["INDEFINIDO", "A TÉRMINO FIJO", "POR DURACION DE OBRA O LABOR"], state="readonly")
+tk.Label(frame_con_scroll, text="TÉRMINO DEL CONTRATO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=21, column=3, padx=5, pady=5, sticky="e")
+termino_contrato = ttk.Combobox(frame_con_scroll, values=["INDEFINIDO", "A TÉRMINO FIJO", "POR DURACION DE OBRA O LABOR"], state="readonly")
 termino_contrato.set("Seleccione una opción ...")  # Valor por defecto
 termino_contrato.grid(row=21, column=4, padx=5, pady=5, sticky="ew")
 termino_contrato.bind("<<ComboboxSelected>>", deshabilitar_duracion_contrato)
@@ -508,30 +542,42 @@ termino_contrato.bind("<<ComboboxSelected>>", deshabilitar_duracion_contrato)
 # Espaciado entre filas
 root.grid_rowconfigure(22, minsize=20)
 
-tk.Label(root, text="Fecha de Inicio de Contrato:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=23, column=1, padx=5, pady=5, sticky="e")
-fecha_inicio_contrato = DateEntry(root, style="Rounded.TEntry", font=("Helvetica", 14), date_pattern='dd/MM/yyyy')
+tk.Label(frame_con_scroll, text="Fecha de Inicio de Contrato:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=23, column=1, padx=5, pady=5, sticky="e")
+fecha_inicio_contrato = DateEntry(frame_con_scroll, style="Rounded.TEntry", font=("Helvetica", 14), date_pattern='dd/MM/yyyy')
 fecha_inicio_contrato.delete(0, "end")
 fecha_inicio_contrato.insert(0, "dd/MM/AAAA")
 fecha_inicio_contrato.grid(row=23, column=2, padx=5, pady=5, sticky="ew")
 
+tk.Label(frame_con_scroll, text="Fecha de Firma de Contrato:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=23, column=3, padx=5, pady=5, sticky="e")
+fecha_firma_contrato = DateEntry(frame_con_scroll, style="Rounded.TEntry", font=("Helvetica", 14), date_pattern='dd/MM/yyyy')
+fecha_firma_contrato.delete(0, "end")
+fecha_firma_contrato.insert(0, "dd/MM/AAAA")
+fecha_firma_contrato.grid(row=23, column=4, padx=5, pady=5, sticky="ew")
+
  # Label y combobox para el municipio
-tk.Label(root, text="DURACION DEL CONTRATO (EN DIAS):", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=23, column=3, padx=5, pady=5, sticky="e")
-entrada_duracion_contrato = ttk.Entry(root, font=("Helvetica", 14))
-entrada_duracion_contrato.grid(row=23, column=4, padx=5, pady=5, sticky="ew")
+tk.Label(frame_con_scroll, text="DURACION DEL CONTRATO (EN DIAS):", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=24, column=1, padx=5, pady=5, sticky="e")
+entrada_duracion_contrato = ttk.Entry(frame_con_scroll, font=("Helvetica", 14))
+entrada_duracion_contrato.grid(row=24, column=2, padx=5, pady=5, sticky="ew")
 
 # Cargar el documento
-cargar_btn = tk.Button(root, text="Cargar Documento", command=cargar_documento)
-cargar_btn.grid(row=24, column=2, columnspan=2, pady=10, sticky="ew")
+cargar_btn = tk.Button(frame_con_scroll, text="Cargar Documento", command=cargar_documento)
+cargar_btn.grid(row=25, column=2, columnspan=2, pady=10, sticky="ew")
 
 # Botón para reemplazar el texto
-reemplazar_btn = tk.Button(root, text="Reemplazar Texto", command=reemplazar_texto)
-reemplazar_btn.grid(row=25, column=2, columnspan=2, pady=10, sticky="ew")
+reemplazar_btn = tk.Button(frame_con_scroll, text="Reemplazar Texto", command=reemplazar_texto)
+reemplazar_btn.grid(row=26, column=2, columnspan=2, pady=10, sticky="ew")
 
 # Crear y colocar el Label para mostrar el archivo cargado
-archivo_label = tk.Label(root, text="No se ha cargado ningún documento.")
-archivo_label.grid(row=26, column=2, columnspan=2, pady=10, sticky="ew")
+archivo_label = tk.Label(frame_con_scroll, text="No se ha cargado ningún documento.")
+archivo_label.grid(row=27, column=2, columnspan=2, pady=10, sticky="ew")
 
 # Cargar el documento por defecto al iniciar la aplicación
 cargar_documento_por_defecto()
+
+# Asegurarse de que el contenedor se expanda
+root.grid_rowconfigure(0, weight=1)
+root.grid_columnconfigure(0, weight=1)
+contenedor.grid_rowconfigure(0, weight=1)
+contenedor.grid_columnconfigure(0, weight=1)
 
 root.mainloop()
