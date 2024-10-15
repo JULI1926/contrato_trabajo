@@ -162,6 +162,30 @@ def deshabilitar_duracion_contrato(event):
         # entrada_duracion_contrato.config(state='normal')  # Alternativa: Habilita el campo
 
 
+# Función para validar la duración del período de prueba
+def validar_duracion_prueba(event=None):
+    termino = termino_contrato.get()
+    try:
+        duracion_contrato = int(entrada_duracion_contrato.get())
+        duracion_prueba = int(entrada_duracion_prueba.get())
+    except ValueError:
+        return
+
+    if termino == "A TÉRMINO FIJO":
+        if duracion_prueba > duracion_contrato / 5:
+            messagebox.showerror("Error", "No puede exceder la quinta parte de la duración del contrato")
+            entrada_duracion_prueba.delete(0, "end")
+    elif termino == "INDEFINIDO":
+        if duracion_prueba > 60:
+            messagebox.showerror("Error", "No puede exceder los 60 días (2 meses) de período de prueba")
+            entrada_duracion_prueba.delete(0, "end")
+    elif termino == "POR DURACION DE OBRA O LABOR":
+        if duracion_prueba > duracion_contrato:
+            messagebox.showerror("Error", "No puede exceder la duración del contrato")
+            entrada_duracion_prueba.delete(0, "end")
+        elif duracion_prueba > 60:
+            messagebox.showerror("Error", "No puede exceder los 60 días (2 meses) de período de prueba")
+            entrada_duracion_prueba.delete(0, "end")
 
 def reemplazar_texto():
     global archivo_cargado
@@ -483,7 +507,7 @@ tk.Label(frame_con_scroll, text="CARGO QUE DESEMPEÑARÁ:", bg='#b0d4ec', font=(
 entrada_cargo = ttk.Entry(frame_con_scroll, style="Rounded.TEntry", font=("Helvetica", 14))
 entrada_cargo.grid(row=18, column=2, padx=5, pady=5, sticky="ew")
 
-tk.Label(frame_con_scroll, text="SALARIO DEL TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=18, column=3, padx=5, pady=5, sticky="e")
+tk.Label(frame_con_scroll, text="SALARIO BASE DEL TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=18, column=3, padx=5, pady=5, sticky="e")
 salario_trabajador = ttk.Entry(frame_con_scroll, style="Rounded.TEntry", font=("Helvetica", 14))
 salario_trabajador.grid(row=18, column=4, padx=5, pady=5, sticky="ew")
 
@@ -537,7 +561,7 @@ tk.Label(frame_con_scroll, text="TÉRMINO DEL CONTRATO:", bg='#b0d4ec', font=("H
 termino_contrato = ttk.Combobox(frame_con_scroll, values=["INDEFINIDO", "A TÉRMINO FIJO", "POR DURACION DE OBRA O LABOR"], state="readonly")
 termino_contrato.set("Seleccione una opción ...")  # Valor por defecto
 termino_contrato.grid(row=21, column=4, padx=5, pady=5, sticky="ew")
-termino_contrato.bind("<<ComboboxSelected>>", deshabilitar_duracion_contrato)
+termino_contrato.bind("<<ComboboxSelected>>" , lambda event: (deshabilitar_duracion_contrato(), validar_duracion_prueba()))
 
 # Espaciado entre filas
 root.grid_rowconfigure(22, minsize=20)
@@ -558,6 +582,12 @@ fecha_firma_contrato.grid(row=23, column=4, padx=5, pady=5, sticky="ew")
 tk.Label(frame_con_scroll, text="DURACION DEL CONTRATO (EN DIAS):", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=24, column=1, padx=5, pady=5, sticky="e")
 entrada_duracion_contrato = ttk.Entry(frame_con_scroll, font=("Helvetica", 14))
 entrada_duracion_contrato.grid(row=24, column=2, padx=5, pady=5, sticky="ew")
+
+ # Label y combobox para el municipio
+tk.Label(frame_con_scroll, text="DURACION DEL PERIODO DE PRUEBA (EN DIAS):", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=24, column=3, padx=5, pady=5, sticky="e")
+entrada_duracion_prueba = ttk.Entry(frame_con_scroll, font=("Helvetica", 14))
+entrada_duracion_prueba.grid(row=24, column=4, padx=5, pady=5, sticky="ew")
+entrada_duracion_prueba.bind("<FocusOut>", validar_duracion_prueba)
 
 # Cargar el documento
 cargar_btn = tk.Button(frame_con_scroll, text="Cargar Documento", command=cargar_documento)
