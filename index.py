@@ -253,27 +253,27 @@ def reemplazar_texto():
             return
 
         reemplazos = {
-            "[Empleador]": entrada_empleador.get(),
+            "[Empleador]": entrada_empleador.get().upper(),
             "[N.I.T]": entrada_nit.get(),
-            "[REPRESENTANTE LEGAL]": entrada_representante_legal.get(),
+            "[REPRESENTANTE LEGAL]": entrada_representante_legal.get().upper(),
             "[C.C.]" : entrada_cc_representante_legal.get(),
-            "[TRABAJADOR]": entrada_trabajador.get(),
+            "[TRABAJADOR]": entrada_trabajador.get().upper(),
             "[C.CNo]": entrada_cc_trabajador.get(),
-            "[CIUDAD]": entrada_ciudad.get(),
-            "[DEPARTAMENTO]": entrada_departamento.get(),
+            "[CIUDAD]": str(entrada_ciudad.get()).upper(),
+            "[DEPARTAMENTO]": str(entrada_departamento.get()).upper(),
             "[DIA]": str(fecha.day),
             "[MES]": fecha.strftime('%B').upper(),
             "[ANO]": str(fecha.year),
-            "[ESTADO CIVIL]": estado_civil.get(),           
-            "[DIRECCION]": entrada_direccion.get(),  
+            "[ESTADO CIVIL]": estado_civil.get().upper(),           
+            "[DIRECCION]": entrada_direccion.get().upper(),  
             "[TELEFONO]": entrada_telefono.get(), 
-            "[CARGO]": entrada_cargo.get(),
-            "[CD_CONT]": entrada_ciudad_contrato.get(),
-            "[DPTO_CONT]": entrada_departamento_contrato.get(),
-            "[JORNADA]": jornada_trabajo.get(),
-            "[TERMINO]": termino_contrato.get(),
+            "[CARGO]": entrada_cargo.get().upper(),
+            "[CD_CONT]": str(entrada_ciudad_contrato.get()).upper(),    
+            "[DPTO_CONT]": str(entrada_departamento_contrato.get()).upper(),
+            "[JORNADA]": jornada_trabajo.get().upper(),
+            "[TERMINO]": termino_contrato.get().upper(),
             "[FECHA_INICIO]": fecha_inicio_contrato.get_date().strftime('%d de %B del %Y').upper(),
-            "[FECHA_FIN]": fecha_fin,
+            "[FECHA_FIN]": fecha_fin.upper(),
 
         }
 
@@ -436,18 +436,22 @@ tk.Label(root, text="TELÉFONO:", bg='#b0d4ec', font=("Helvetica", 14, "bold ita
 entrada_telefono = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14))
 entrada_telefono.grid(row=14, column=4, padx=5, pady=5, sticky="ew")
 
-root.grid_rowconfigure(15, minsize=20)
+tk.Label(root, text="TELÉFONO CONTACTO ADICIONAL:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=15, column=1, padx=5, pady=5, sticky="e")
+entrada_telefono = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14))
+entrada_telefono.grid(row=15, column=2, padx=5, pady=5, sticky="ew")
+
+root.grid_rowconfigure(16, minsize=20)
 
 # Datos del Contrato
-tk.Label(root, text="DATOS DEL CONTRATO", font=("Helvetica", 16, "bold")).grid(row=16, column=2, columnspan=4, padx=5, pady=10)
+tk.Label(root, text="DATOS DEL CONTRATO", font=("Helvetica", 16, "bold")).grid(row=17, column=2, columnspan=4, padx=5, pady=10)
 
-tk.Label(root, text="CARGO QUE DESEMPEÑARÁ:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=17, column=1, padx=5, pady=5, sticky="e")
+tk.Label(root, text="CARGO QUE DESEMPEÑARÁ:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=18, column=1, padx=5, pady=5, sticky="e")
 entrada_cargo = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14))
-entrada_cargo.grid(row=17, column=2, padx=5, pady=5, sticky="ew")
+entrada_cargo.grid(row=18, column=2, padx=5, pady=5, sticky="ew")
 
-tk.Label(root, text="SALARIO DEL TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=17, column=3, padx=5, pady=5, sticky="e")
+tk.Label(root, text="SALARIO DEL TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=18, column=3, padx=5, pady=5, sticky="e")
 salario_trabajador = ttk.Entry(root, style="Rounded.TEntry", font=("Helvetica", 14))
-salario_trabajador.grid(row=17, column=4, padx=5, pady=5, sticky="ew")
+salario_trabajador.grid(row=18, column=4, padx=5, pady=5, sticky="ew")
 
 # Espaciado entre filas
 root.grid_rowconfigure(18, minsize=20)
