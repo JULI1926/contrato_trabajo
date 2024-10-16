@@ -162,16 +162,42 @@ def deshabilitar_duracion_contrato(event):
         # entrada_duracion_contrato.config(state='normal')  # Alternativa: Habilita el campo
 
 
+
+
+
 # Función para validar la duración del período de prueba
 def validar_duracion_prueba(event=None):
     termino = termino_contrato.get()
+    print(f"Validando duración de prueba para el término: {termino}")
+    
+    duracion_prueba_str = entrada_duracion_prueba.get()
+    
+    if not duracion_prueba_str:
+        print("La entrada de duración del período de prueba está vacía")
+        #messagebox.showerror("Error", "Por favor, ingrese la duración del período de prueba")
+        return
+    
     try:
-        duracion_contrato = int(entrada_duracion_contrato.get())
-        duracion_prueba = int(entrada_duracion_prueba.get())
+        duracion_prueba = int(duracion_prueba_str)
+        print(f"Duración de prueba: {duracion_prueba}")
     except ValueError:
+        print("Error al convertir la duración de prueba a entero")
+        messagebox.showerror("Error", "Por favor, ingrese un valor numérico válido para la duración del período de prueba")
         return
 
     if termino == "A TÉRMINO FIJO":
+        duracion_contrato_str = entrada_duracion_contrato.get()
+        if not duracion_contrato_str:
+            print("La entrada de duración del contrato está vacía")
+            messagebox.showerror("Error", "Por favor, ingrese la duración del contrato")
+            return
+        try:
+            duracion_contrato = int(duracion_contrato_str)
+            print(f"Duración del contrato: {duracion_contrato}")
+        except ValueError:
+            print("Error al convertir la duración del contrato a entero")
+            messagebox.showerror("Error", "Por favor, ingrese un valor numérico válido para la duración del contrato")
+            return
         if duracion_prueba > duracion_contrato / 5:
             messagebox.showerror("Error", "No puede exceder la quinta parte de la duración del contrato")
             entrada_duracion_prueba.delete(0, "end")
@@ -180,12 +206,29 @@ def validar_duracion_prueba(event=None):
             messagebox.showerror("Error", "No puede exceder los 60 días (2 meses) de período de prueba")
             entrada_duracion_prueba.delete(0, "end")
     elif termino == "POR DURACION DE OBRA O LABOR":
-        if duracion_prueba > duracion_contrato:
-            messagebox.showerror("Error", "No puede exceder la duración del contrato")
-            entrada_duracion_prueba.delete(0, "end")
-        elif duracion_prueba > 60:
+        if duracion_prueba > 60:
             messagebox.showerror("Error", "No puede exceder los 60 días (2 meses) de período de prueba")
             entrada_duracion_prueba.delete(0, "end")
+    else:
+        print("Término del contrato no reconocido")
+        
+# Función para manejar la selección del primer Combobox
+def manejar_seleccion(event):
+    deshabilitar_duracion_contrato(event)
+    validar_duracion_prueba(event)
+    actualizar_objeto_contrato(event)
+
+# Función para actualizar la visibilidad del segundo Combobox
+def actualizar_objeto_contrato(event):
+    global objeto_contrato
+    global termino_objeto_contrato
+
+    if termino_contrato.get() == "POR DURACION DE OBRA O LABOR":        
+        objeto_contrato.grid()
+        objeto_contrato.grid()
+    else:
+        objeto_contrato.grid_remove()
+        objeto_contrato.grid_remove()
 
 def reemplazar_texto():
     global archivo_cargado
@@ -269,6 +312,17 @@ def reemplazar_texto():
             campos_faltantes.append("Término del Contrato")
         if not fecha_inicio_contrato.get_date():
             campos_faltantes.append("Fecha de Inicio del Contrato")
+        if not fecha_fin:
+            campos_faltantes.append("Fecha de Fin del Contrato")
+        if not objeto_contrato.get():
+            campos_faltantes.append("Objeto del Contrato")
+        if not fecha_nacimiento.get_date():
+            campos_faltantes.append("Fecha de Nacimiento")        
+        if not fecha_firma_contrato.get_date():
+            campos_faltantes.append("Fecha de Firma del Contrato")
+        if not entrada_duracion_prueba.get():
+            campos_faltantes.append("Duración del Período de Prueba")
+
 
         # Si hay campos faltantes, mostrar una alerta y no realizar los reemplazos
         if campos_faltantes:
@@ -299,6 +353,7 @@ def reemplazar_texto():
             "[FECHA_INICIO]": fecha_inicio_contrato.get_date().strftime('%d de %B del %Y').upper(),
             "[FECHA_FIN]": fecha_fin.upper(),
             "[FECHA_FIRMA]": fecha_firma_contrato.get_date().strftime('%d de %B del %Y').upper(),
+            "[OBJETO]": objeto_contrato.get().upper(),
 
         }
 
@@ -561,45 +616,57 @@ tk.Label(frame_con_scroll, text="TÉRMINO DEL CONTRATO:", bg='#b0d4ec', font=("H
 termino_contrato = ttk.Combobox(frame_con_scroll, values=["INDEFINIDO", "A TÉRMINO FIJO", "POR DURACION DE OBRA O LABOR"], state="readonly")
 termino_contrato.set("Seleccione una opción ...")  # Valor por defecto
 termino_contrato.grid(row=21, column=4, padx=5, pady=5, sticky="ew")
-termino_contrato.bind("<<ComboboxSelected>>" , lambda event: (deshabilitar_duracion_contrato(), validar_duracion_prueba()))
-
+#termino_contrato.bind("<<ComboboxSelected>>" , lambda event: (deshabilitar_duracion_contrato(), validar_duracion_prueba(), actualizar_objeto_contrato()))
+termino_contrato.bind("<<ComboboxSelected>>", manejar_seleccion)
+termino_contrato.bind("<FocusOut>", validar_duracion_prueba)
 # Espaciado entre filas
-root.grid_rowconfigure(22, minsize=20)
+root.grid_rowconfigure(22, minsize=21)
 
-tk.Label(frame_con_scroll, text="Fecha de Inicio de Contrato:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=23, column=1, padx=5, pady=5, sticky="e")
+tk.Label(frame_con_scroll, text="OBJETO DEL CONTRATO DE TRABAJO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=22, column=1, padx=5, pady=5, sticky="e")
+objeto_contrato = ttk.Combobox(frame_con_scroll, values=["LICENCIA DE MATERNIDAD", "INCREMENTO DE VENTAS", "VACACIONES"], state="readonly")
+objeto_contrato.set("Seleccione una opción ...")  # Valor por defecto
+objeto_contrato.grid(row=22, column=2, padx=5, pady=5, sticky="ew")
+
+
+
+tk.Label(frame_con_scroll, text="Fecha de Inicio de Contrato:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=24, column=1, padx=5, pady=5, sticky="e")
 fecha_inicio_contrato = DateEntry(frame_con_scroll, style="Rounded.TEntry", font=("Helvetica", 14), date_pattern='dd/MM/yyyy')
 fecha_inicio_contrato.delete(0, "end")
 fecha_inicio_contrato.insert(0, "dd/MM/AAAA")
-fecha_inicio_contrato.grid(row=23, column=2, padx=5, pady=5, sticky="ew")
+fecha_inicio_contrato.grid(row=24, column=2, padx=5, pady=5, sticky="ew")
 
-tk.Label(frame_con_scroll, text="Fecha de Firma de Contrato:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=23, column=3, padx=5, pady=5, sticky="e")
+tk.Label(frame_con_scroll, text="Fecha de Firma de Contrato:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=24, column=3, padx=5, pady=5, sticky="e")
 fecha_firma_contrato = DateEntry(frame_con_scroll, style="Rounded.TEntry", font=("Helvetica", 14), date_pattern='dd/MM/yyyy')
 fecha_firma_contrato.delete(0, "end")
 fecha_firma_contrato.insert(0, "dd/MM/AAAA")
-fecha_firma_contrato.grid(row=23, column=4, padx=5, pady=5, sticky="ew")
+fecha_firma_contrato.grid(row=24, column=4, padx=5, pady=5, sticky="ew")
 
  # Label y combobox para el municipio
-tk.Label(frame_con_scroll, text="DURACION DEL CONTRATO (EN DIAS):", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=24, column=1, padx=5, pady=5, sticky="e")
+tk.Label(frame_con_scroll, text="DURACION DEL CONTRATO (EN DIAS):", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=25, column=1, padx=5, pady=5, sticky="e")
 entrada_duracion_contrato = ttk.Entry(frame_con_scroll, font=("Helvetica", 14))
-entrada_duracion_contrato.grid(row=24, column=2, padx=5, pady=5, sticky="ew")
+entrada_duracion_contrato.grid(row=25, column=2, padx=5, pady=5, sticky="ew")
+# Enlazar la función de validación a los eventos de las entradas
+entrada_duracion_contrato.bind("<FocusOut>", validar_duracion_prueba)
+
 
  # Label y combobox para el municipio
-tk.Label(frame_con_scroll, text="DURACION DEL PERIODO DE PRUEBA (EN DIAS):", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=24, column=3, padx=5, pady=5, sticky="e")
+tk.Label(frame_con_scroll, text="DURACION DEL PERIODO DE PRUEBA (EN DIAS):", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=25, column=3, padx=5, pady=5, sticky="e")
 entrada_duracion_prueba = ttk.Entry(frame_con_scroll, font=("Helvetica", 14))
-entrada_duracion_prueba.grid(row=24, column=4, padx=5, pady=5, sticky="ew")
+entrada_duracion_prueba.grid(row=25, column=4, padx=5, pady=5, sticky="ew")
+#entrada_duracion_prueba.bind("<FocusOut>", manejar_seleccion)
 entrada_duracion_prueba.bind("<FocusOut>", validar_duracion_prueba)
 
 # Cargar el documento
 cargar_btn = tk.Button(frame_con_scroll, text="Cargar Documento", command=cargar_documento)
-cargar_btn.grid(row=25, column=2, columnspan=2, pady=10, sticky="ew")
+cargar_btn.grid(row=28, column=2, columnspan=2, pady=10, sticky="ew")
 
 # Botón para reemplazar el texto
 reemplazar_btn = tk.Button(frame_con_scroll, text="Reemplazar Texto", command=reemplazar_texto)
-reemplazar_btn.grid(row=26, column=2, columnspan=2, pady=10, sticky="ew")
+reemplazar_btn.grid(row=29, column=2, columnspan=2, pady=10, sticky="ew")
 
 # Crear y colocar el Label para mostrar el archivo cargado
 archivo_label = tk.Label(frame_con_scroll, text="No se ha cargado ningún documento.")
-archivo_label.grid(row=27, column=2, columnspan=2, pady=10, sticky="ew")
+archivo_label.grid(row=30, column=2, columnspan=2, pady=10, sticky="ew")
 
 # Cargar el documento por defecto al iniciar la aplicación
 cargar_documento_por_defecto()
@@ -609,5 +676,9 @@ root.grid_rowconfigure(0, weight=1)
 root.grid_columnconfigure(0, weight=1)
 contenedor.grid_rowconfigure(0, weight=1)
 contenedor.grid_columnconfigure(0, weight=1)
+
+# Configuración de la interfaz gráfica y Reinicio de Variables
+#termino_contrato.set("INDEFINIDO")  # Valor por defecto para pruebas
+
 
 root.mainloop()
