@@ -281,7 +281,7 @@ def reemplazar_texto():
         if not entrada_empleador.get():
             campos_faltantes.append("Empleador")
         if not entrada_nit.get():
-            campos_faltantes.append("N.I.T")
+            campos_faltantes.append("N.I.T del Empleador")
         if not entrada_representante_legal.get():
             campos_faltantes.append("Representante Legal")
         if not entrada_cc_representante_legal.get():
@@ -302,18 +302,18 @@ def reemplazar_texto():
             campos_faltantes.append("Teléfono")
         if not entrada_cargo.get():
             campos_faltantes.append("Cargo")
-        if not entrada_ciudad_contrato.get():
-            campos_faltantes.append("Ciudad Contrato")
+        if not salario_trabajador.get():
+            campos_faltantes.append("Salario Base Trabajador")
         if not entrada_departamento_contrato.get():
             campos_faltantes.append("Departamento Contrato")
+        if not entrada_ciudad_contrato.get():
+            campos_faltantes.append("Ciudad Contrato")        
         if not jornada_trabajo.get():
             campos_faltantes.append("Jornada")
         if not termino_contrato.get():
             campos_faltantes.append("Término del Contrato")
         if not fecha_inicio_contrato.get_date():
-            campos_faltantes.append("Fecha de Inicio del Contrato")
-        if not fecha_fin:
-            campos_faltantes.append("Fecha de Fin del Contrato")
+            campos_faltantes.append("Fecha de Inicio del Contrato")        
         if not objeto_contrato.get():
             campos_faltantes.append("Objeto del Contrato")
         if not fecha_nacimiento.get_date():
