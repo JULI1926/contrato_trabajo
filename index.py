@@ -17,6 +17,8 @@ reemplazos = {}
 # Variable global para almacenar la ruta del archivo cargado
 archivo_cargado = None
 
+
+
 # Cargar el archivo JSON
 def cargar_datos_json(ruta_archivo):
     """Carga el archivo JSON y devuelve los datos."""
@@ -380,6 +382,20 @@ def reemplazar_texto():
     else:
         messagebox.showwarning("Advertencia", "No se ha cargado ningún documento.")
 
+# Definición de la función actualizar_municipios en el ámbito global
+def actualizar_municipios(event):
+    departamento_seleccionado = entrada_departamento.get()
+    entrada_ciudad["values"] = municipios_por_departamento.get(departamento_seleccionado, [])
+    entrada_ciudad.set('')  # Limpiar la selección de municipio al cambiar el departamento
+        
+
+def actualizar_municipios_contrato(event):
+    departamento_seleccionado = entrada_departamento_contrato.get()
+    entrada_ciudad_contrato["values"] = municipios_por_departamento.get(departamento_seleccionado, [])
+    entrada_ciudad_contrato.set('')  # Limpiar la selección de municipio al cambiar el departamento
+        
+
+
 def create_scrollable_frame(root):
     # Configuración de la ventana principal
     root.geometry("800x600")  # Tamaño inicial
@@ -387,11 +403,11 @@ def create_scrollable_frame(root):
     root.grid_columnconfigure(0, weight=1)  # Hacer la columna 0 expandible
 
     # Crear un frame contenedor para el canvas y el scrollbar
-    container = ttk.Frame(root)
+    container = tk.Frame(root, bg=config.BG_COLOR)
     container.grid(row=0, column=0, sticky="nsew")  # Ocupa todo el espacio
 
     # Crear un canvas dentro del frame contenedor
-    canvas = tk.Canvas(container)
+    canvas = tk.Canvas(container, bg=config.BG_COLOR)
     canvas.grid(row=0, column=0, sticky="nsew")
 
     # Hacer que el canvas y el contenedor sean expandibles
@@ -404,10 +420,15 @@ def create_scrollable_frame(root):
     canvas.configure(yscrollcommand=scrollbar.set)
 
     # Crear un frame dentro del canvas donde se colocarán los widgets
-    scrollable_frame = ttk.Frame(canvas)
+    scrollable_frame = tk.Frame(canvas, bg=config.BG_COLOR)
 
     # Crear una ventana dentro del canvas para incluir el frame scrollable
     canvas_window = canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")  # Aquí se asigna la ventana a la variable
+
+    # style = ttk.Style()
+    # style.configure("Primary.TButton", background=config.PRIMARY_COLOR, foreground="white")
+    # style.configure("Secondary.TButton", background=config.SECONDARY_COLOR, foreground="white")
+    # style.configure("TFrame", background=config.PRIMARY_COLOR)  # Configurar el color de fondo del frame
 
     # Función para ajustar el tamaño del canvas cuando cambie el contenido
     def on_frame_configure(event):
@@ -435,11 +456,23 @@ def create_scrollable_frame(root):
 # Código principal
 
 def main(): 
-    global archivo_label   
+    global archivo_label  
+    global entrada_departamento, entrada_ciudad, entrada_departamento_contrato, entrada_ciudad_contrato 
+    global municipios_por_departamento
 
     # Crear la ventana principal
     root = tk.Tk()
     root.title(config.APP_NAME)
+    root.configure(bg=config.BG_COLOR)  # Configura el color de fondo de la ventana principal
+
+    scrollable_frame = create_scrollable_frame(root)
+
+    # Cargar y procesar los datos JSON Municipios y Departamentos Nacimiento
+    datos_json = cargar_datos_json('ruta/al/archivo.json')
+    departamentos, municipios_por_departamento = procesar_datos(datos_json)
+
+    # # Llamar a la funcion
+    # autompletar_municipios(departamentos, municipios_por_departamento)
     
 
     # Crear el frame desplazable
@@ -487,15 +520,16 @@ def main():
     vcmd = (root.register(solo_letras), '%P')
     vcmdnum = (root.register(solo_numeros), '%P')
 
-    # Subtítulo Datos del Empleador
-    tk.Label(scrollable_frame, text="DATOS DEL EMPLEADOR", font=config.FONT_SUBTITLE).grid(row=1, column=2, columnspan=4, padx=5, pady=10)
+   
 
+    # Subtítulo Datos del Empleador
+    tk.Label(scrollable_frame, text="DATOS DEL EMPLEADOR", font=("Arial", 14)).grid(row=1, column=2, columnspan=4, padx=5, pady=10)
     # Datos del Empleador
-    tk.Label(scrollable_frame, text="NOMBRE DEL EMPLEADOR", bg=config.BG_COLOR, font=config.FONT_LABEL).grid(row=2, column=1, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="NOMBRE DEL EMPLEADOR", bg=config.BG_LABEL, font=config.FONT_LABEL).grid(row=2, column=1, padx=5, pady=5, sticky="e")
     entrada_empleador = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=config.FONT_ENTRY, validate="key")
     entrada_empleador.grid(row=2, column=2, padx=5, pady=5, sticky="ew")
 
-    tk.Label(scrollable_frame, text="N.I.T EMPLEADOR:", bg=config.BG_COLOR, font=config.FONT_LABEL).grid(row=2, column=3, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="N.I.T EMPLEADOR:", bg=config.BG_LABEL, font=config.FONT_LABEL).grid(row=2, column=3, padx=5, pady=5, sticky="e")
     entrada_nit = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=config.FONT_ENTRY)
     entrada_nit.grid(row=2, column=4, padx=5, pady=5, sticky="ew")
 
@@ -506,11 +540,11 @@ def main():
     tk.Label(scrollable_frame, text="DATOS DEL REPRESENTANTE LEGAL", font=config.FONT_SUBTITLE).grid(row=4, column=2, columnspan=4, padx=5, pady=10)
 
     # Datos del Representante Legal
-    tk.Label(scrollable_frame, text="REPRESENTANTE LEGAL:", bg=config.BG_COLOR, font=config.FONT_LABEL).grid(row=5, column=1, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="REPRESENTANTE LEGAL:", bg=config.BG_LABEL, font=config.FONT_LABEL).grid(row=5, column=1, padx=5, pady=5, sticky="e")
     entrada_representante_legal = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=config.FONT_ENTRY, validate="key")
     entrada_representante_legal.grid(row=5, column=2, padx=5, pady=5, sticky="ew")
 
-    tk.Label(scrollable_frame, text="CC REPRESENTANTE LEGAL:", bg=config.BG_COLOR, font=config.FONT_LABEL).grid(row=5, column=3, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="CC REPRESENTANTE LEGAL:", bg=config.BG_LABEL, font=config.FONT_LABEL).grid(row=5, column=3, padx=5, pady=5, sticky="e")
     entrada_cc_representante_legal = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=config.FONT_ENTRY, validate="key")
     entrada_cc_representante_legal.grid(row=5, column=4, padx=5, pady=5, sticky="ew")
 
@@ -521,11 +555,11 @@ def main():
     tk.Label(scrollable_frame, text="DATOS DEL EMPLEADOR", font=("Helvetica", 14, "bold")).grid(row=1, column=2, columnspan=4, padx=5, pady=10)
 
     # Datos del Empleador
-    tk.Label(scrollable_frame, text="NOMBRE DEL EMPLEADOR", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=2, column=1, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="NOMBRE DEL EMPLEADOR", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=2, column=1, padx=5, pady=5, sticky="e")
     entrada_empleador = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14), validate="key")
     entrada_empleador.grid(row=2, column=2, padx=5, pady=5, sticky="ew")
 
-    tk.Label(scrollable_frame, text="N.I.T EMPLEADOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=2, column=3, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="N.I.T EMPLEADOR:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=2, column=3, padx=5, pady=5, sticky="e")
     entrada_nit = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14))
     entrada_nit.grid(row=2, column=4, padx=5, pady=5, sticky="ew")
 
@@ -536,11 +570,11 @@ def main():
     tk.Label(scrollable_frame, text="DATOS DEL REPRESENTANTE LEGAL", font=("Helvetica", 16, "bold")).grid(row=4, column=2, columnspan=4, padx=5, pady=10)
 
     # Datos del Representante Legal
-    tk.Label(scrollable_frame, text="REPRESENTANTE LEGAL:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=5, column=1, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="REPRESENTANTE LEGAL:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=5, column=1, padx=5, pady=5, sticky="e")
     entrada_representante_legal = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14), validate="key")
     entrada_representante_legal.grid(row=5, column=2, padx=5, pady=5, sticky="ew")
 
-    tk.Label(scrollable_frame, text="CC REPRESENTANTE LEGAL:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=5, column=3, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="CC REPRESENTANTE LEGAL:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=5, column=3, padx=5, pady=5, sticky="e")
     entrada_cc_representante_legal = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14), validate="key")
     entrada_cc_representante_legal.grid(row=5, column=4, padx=5, pady=5, sticky="ew")
 
@@ -551,11 +585,11 @@ def main():
     tk.Label(scrollable_frame, text="DATOS DEL TRABAJADOR", font=("Helvetica", 16, "bold")).grid(row=7, column=2, columnspan=4, padx=5, pady=10)
 
     # Datos del Trabajador
-    tk.Label(scrollable_frame, text="NOMBRE TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=8, column=1, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="NOMBRE TRABAJADOR:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=8, column=1, padx=5, pady=5, sticky="e")
     entrada_trabajador = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14))
     entrada_trabajador.grid(row=8, column=2, padx=5, pady=5, sticky="ew")
 
-    tk.Label(scrollable_frame, text="CC DEL TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=8, column=3, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="CC DEL TRABAJADOR:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=8, column=3, padx=5, pady=5, sticky="e")
     entrada_cc_trabajador = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14))
     entrada_cc_trabajador.grid(row=8, column=4, padx=5, pady=5, sticky="ew")
 
@@ -563,69 +597,50 @@ def main():
     root.grid_rowconfigure(9, minsize=20)
 
     # Fecha y lugar de Nacimiento
-    tk.Label(scrollable_frame, text="Fecha y lugar de Nacimiento", bg='#b0d4ec', font=("Helvetica", 12, "bold")).grid(row=10, column=2, columnspan=4, padx=5, pady=10)
+    tk.Label(scrollable_frame, text="Fecha y lugar de Nacimiento", bg=config.BG_LABEL, font=("Helvetica", 12, "bold")).grid(row=10, column=2, columnspan=4, padx=5, pady=10)
 
-    tk.Label(scrollable_frame, text="Fecha de Nacimiento:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=11, column=1, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="Fecha de Nacimiento:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=11, column=1, padx=5, pady=5, sticky="e")
     fecha_nacimiento = DateEntry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14), date_pattern='dd/MM/yyyy')
     fecha_nacimiento.delete(0, "end")
     fecha_nacimiento.insert(0, "dd/MM/AAAA")
     fecha_nacimiento.grid(row=11, column=2, padx=5, pady=5, sticky="ew")
 
+    # Label y combobox para el departamento
+    tk.Label(scrollable_frame, text="DEPARTAMENTO:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=11, column=3, padx=5, pady=5, sticky="e")
+    entrada_departamento = ttk.Combobox(scrollable_frame, values=departamentos, font=("Helvetica", 14))
+    entrada_departamento.grid(row=11, column=4, padx=5, pady=5, sticky="ew")
+    entrada_departamento.bind("<<ComboboxSelected>>", actualizar_municipios)
 
-    def autompletar_municipios(departamentos, municipios_por_departamento): 
+    # Label y combobox para el municipio
+    tk.Label(scrollable_frame, text="MUNICIPIO:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=12, column=1, padx=5, pady=5, sticky="e")
+    entrada_ciudad = ttk.Combobox(scrollable_frame, font=("Helvetica", 14))
+    entrada_ciudad.grid(row=12, column=2, padx=5, pady=5, sticky="ew")
+    
+    
 
-        global entrada_departamento, entrada_ciudad 
-        
-        # Función para actualizar el combobox de municipios cuando cambie el departamento
-        def actualizar_municipios(event):
-            departamento_seleccionado = entrada_departamento.get()
-            entrada_ciudad["values"] = municipios_por_departamento.get(departamento_seleccionado, [])
-            entrada_ciudad.set('')  # Limpiar la selección de municipio al cambiar el departamento
-
-        
-        # Label y combobox para el departamento
-        tk.Label(scrollable_frame, text="DEPARTAMENTO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=11, column=3, padx=5, pady=5, sticky="e")
-        entrada_departamento = ttk.Combobox(scrollable_frame, values=departamentos, font=("Helvetica", 14))
-        entrada_departamento.grid(row=11, column=4, padx=5, pady=5, sticky="ew")
-        entrada_departamento.bind("<<ComboboxSelected>>", actualizar_municipios)
-
-        # Label y combobox para el municipio
-        tk.Label(scrollable_frame, text="MUNICIPIO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=12, column=1, padx=5, pady=5, sticky="e")
-        entrada_ciudad = ttk.Combobox(scrollable_frame, font=("Helvetica", 14))
-        entrada_ciudad.grid(row=12, column=2, padx=5, pady=5, sticky="ew")
-
-    def main():
-        # Cargar y procesar los datos JSON
-        datos_json = cargar_datos_json('ruta/al/archivo.json')
-        departamentos, municipios_por_departamento = procesar_datos(datos_json)
-
-        # Inicializar la interfaz
-        autompletar_municipios(departamentos, municipios_por_departamento)
-
-    if __name__ == "__main__":
-        main()
+    
 
     # Configurar la fuente para los elementos del Combobox
     root.option_add('*TCombobox*Listbox.font', ("Helvetica", 14))
     root.option_add('*TCombobox.font', ("Helvetica", 14)) 
 
-    tk.Label(scrollable_frame, text="ESTADO CIVIL:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=12, column=3, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="ESTADO CIVIL:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=12, column=3, padx=5, pady=5, sticky="e")
     estado_civil = ttk.Combobox(scrollable_frame, values=["SOLTERO", "SOLTERA", "CASADO", "CASADA", "VIUDO", "VIUDA", "SEPARADO", "SEPARADA", "UNION LIBRE"], state="readonly")
     estado_civil.set("Seleccione una opción ...")  # Valor por defecto
     estado_civil.grid(row=12, column=4, padx=5, pady=5, sticky="ew")
 
     # Dirección
-    tk.Label(scrollable_frame, text="Dirección y Teléfono", bg='#b0d4ec', font=("Helvetica", 12, "bold")).grid(row=13, column=2, columnspan=4, padx=5, pady=10)
+    tk.Label(scrollable_frame, text="Dirección y Teléfono", bg=config.BG_LABEL, font=("Helvetica", 12, "bold")).grid(row=13, column=2, columnspan=4, padx=5, pady=10)
 
-    tk.Label(scrollable_frame, text="DIRECCIÓN:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=14, column=1, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="DIRECCIÓN:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=14, column=1, padx=5, pady=5, sticky="e")
     entrada_direccion = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14))
     entrada_direccion.grid(row=14, column=2, padx=5, pady=5, sticky="ew")
 
-    tk.Label(scrollable_frame, text="TELÉFONO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=14, column=3, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="TELÉFONO:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=14, column=3, padx=5, pady=5, sticky="e")
     entrada_telefono = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14))
     entrada_telefono.grid(row=14, column=4, padx=5, pady=5, sticky="ew")
 
-    tk.Label(scrollable_frame, text="TELÉFONO CONTACTO ADICIONAL:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=15, column=1, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="TELÉFONO CONTACTO ADICIONAL:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=15, column=1, padx=5, pady=5, sticky="e")
     entrada_telefono = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14))
     entrada_telefono.grid(row=15, column=2, padx=5, pady=5, sticky="ew")
 
@@ -634,91 +649,69 @@ def main():
     # Datos del Contrato
     tk.Label(scrollable_frame, text="DATOS DEL CONTRATO", font=("Helvetica", 16, "bold")).grid(row=17, column=2, columnspan=4, padx=5, pady=10)
 
-    tk.Label(scrollable_frame, text="CARGO QUE DESEMPEÑARÁ:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=18, column=1, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="CARGO QUE DESEMPEÑARÁ:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=18, column=1, padx=5, pady=5, sticky="e")
     entrada_cargo = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14))
     entrada_cargo.grid(row=18, column=2, padx=5, pady=5, sticky="ew")
 
-    tk.Label(scrollable_frame, text="SALARIO BASE DEL TRABAJADOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=18, column=3, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="SALARIO BASE DEL TRABAJADOR:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=18, column=3, padx=5, pady=5, sticky="e")
     salario_trabajador = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14))
     salario_trabajador.grid(row=18, column=4, padx=5, pady=5, sticky="ew")
 
+  
+    tk.Label(scrollable_frame, text="DEPARTAMENTO DE LABOR:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=19, column=1, padx=5, pady=5, sticky="e")
+    entrada_departamento_contrato = ttk.Combobox(scrollable_frame, values=departamentos, font=("Helvetica", 14))
+    entrada_departamento_contrato.grid(row=19, column=2, padx=5, pady=5, sticky="ew")
+    entrada_departamento_contrato.bind("<<ComboboxSelected>>", actualizar_municipios_contrato)
+
+    # Label y combobox para el municipio
+    tk.Label(scrollable_frame, text="MUNICIPIO DE LABOR:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=19, column=3, padx=5, pady=5, sticky="e")
+    entrada_ciudad_contrato = ttk.Combobox(scrollable_frame, font=("Helvetica", 14))
+    entrada_ciudad_contrato.grid(row=19, column=4, padx=5, pady=5, sticky="ew")
+
     # Espaciado entre filas
-    root.grid_rowconfigure(18, minsize=20)
-
-
-
-    def autompletar_municipios_contrato(departamentos, municipios_por_departamento):  
-        global entrada_departamento_contrato, entrada_ciudad_contrato
-        
-        # Función para actualizar el combobox de municipios cuando cambie el departamento
-        def actualizar_municipios(event):
-            departamento_seleccionado = entrada_departamento_contrato.get()
-            entrada_ciudad_contrato["values"] = municipios_por_departamento.get(departamento_seleccionado, [])
-            entrada_ciudad_contrato.set('')  # Limpiar la selección de municipio al cambiar el departamento
-
-        # Label y combobox para el departamento
-        tk.Label(scrollable_frame, text="DEPARTAMENTO DE LABOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=19, column=1, padx=5, pady=5, sticky="e")
-        entrada_departamento_contrato = ttk.Combobox(scrollable_frame, values=departamentos, font=("Helvetica", 14))
-        entrada_departamento_contrato.grid(row=19, column=2, padx=5, pady=5, sticky="ew")
-        entrada_departamento_contrato.bind("<<ComboboxSelected>>", actualizar_municipios)
-
-        # Label y combobox para el municipio
-        tk.Label(scrollable_frame, text="MUNICIPIO DE LABOR:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=19, column=3, padx=5, pady=5, sticky="e")
-        entrada_ciudad_contrato = ttk.Combobox(scrollable_frame, font=("Helvetica", 14))
-        entrada_ciudad_contrato.grid(row=19, column=4, padx=5, pady=5, sticky="ew")
-
-    def main():
-        # Cargar y procesar los datos JSON
-        datos_json = cargar_datos_json('ruta/al/archivo.json')
-        departamentos, municipios_por_departamento = procesar_datos(datos_json)
-
-        # Inicializar la interfaz
-        autompletar_municipios_contrato(departamentos, municipios_por_departamento)
-
-    if __name__ == "__main__":
-        main()
+    root.grid_rowconfigure(18, minsize=20)    
 
 
     root.grid_rowconfigure(20, minsize=20)
 
-    tk.Label(scrollable_frame, text="JORNADA DE TRABAJO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=21, column=1, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="JORNADA DE TRABAJO:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=21, column=1, padx=5, pady=5, sticky="e")
     jornada_trabajo = ttk.Combobox(scrollable_frame, values=["TIEMPO COMPLETO", "MEDIO TIEMPO", "POR HORAS"], state="readonly")
     jornada_trabajo.set("Seleccione una opción ...")  # Valor por defecto
     jornada_trabajo.grid(row=21, column=2, padx=5, pady=5, sticky="ew")
     jornada_trabajo.bind("<<ComboboxSelected>>", actualizar_salario)
 
 
-    tk.Label(scrollable_frame, text="TÉRMINO DEL CONTRATO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=21, column=3, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="TÉRMINO DEL CONTRATO:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=21, column=3, padx=5, pady=5, sticky="e")
     termino_contrato = ttk.Combobox(scrollable_frame, values=["INDEFINIDO", "A TÉRMINO FIJO", "POR DURACION DE OBRA O LABOR"], state="readonly")
     termino_contrato.set("Seleccione una opción ...")  # Valor por defecto
     termino_contrato.grid(row=21, column=4, padx=5, pady=5, sticky="ew")
-    #termino_contrato.bind("<<ComboboxSelected>>" , lambda event: (deshabilitar_duracion_contrato(), validar_duracion_prueba(), actualizar_objeto_contrato()))
     termino_contrato.bind("<<ComboboxSelected>>", manejar_seleccion)
     termino_contrato.bind("<FocusOut>", validar_duracion_prueba)
+
     # Espaciado entre filas
     root.grid_rowconfigure(22, minsize=21)
 
-    tk.Label(scrollable_frame, text="OBJETO DEL CONTRATO DE TRABAJO:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=22, column=1, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="OBJETO DEL CONTRATO DE TRABAJO:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=22, column=1, padx=5, pady=5, sticky="e")
     objeto_contrato = ttk.Combobox(scrollable_frame, values=["LICENCIA DE MATERNIDAD", "INCREMENTO DE VENTAS", "VACACIONES"], state="readonly")
     objeto_contrato.set("Seleccione una opción ...")  # Valor por defecto
     objeto_contrato.grid(row=22, column=2, padx=5, pady=5, sticky="ew")
 
 
 
-    tk.Label(scrollable_frame, text="Fecha de Inicio de Contrato:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=24, column=1, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="Fecha de Inicio de Contrato:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=24, column=1, padx=5, pady=5, sticky="e")
     fecha_inicio_contrato = DateEntry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14), date_pattern='dd/MM/yyyy')
     fecha_inicio_contrato.delete(0, "end")
     fecha_inicio_contrato.insert(0, "dd/MM/AAAA")
     fecha_inicio_contrato.grid(row=24, column=2, padx=5, pady=5, sticky="ew")
 
-    tk.Label(scrollable_frame, text="Fecha de Firma de Contrato:", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=24, column=3, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="Fecha de Firma de Contrato:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=24, column=3, padx=5, pady=5, sticky="e")
     fecha_firma_contrato = DateEntry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14), date_pattern='dd/MM/yyyy')
     fecha_firma_contrato.delete(0, "end")
     fecha_firma_contrato.insert(0, "dd/MM/AAAA")
     fecha_firma_contrato.grid(row=24, column=4, padx=5, pady=5, sticky="ew")
 
     # Label y combobox para el municipio
-    tk.Label(scrollable_frame, text="DURACION DEL CONTRATO (EN DIAS):", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=25, column=1, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="DURACION DEL CONTRATO (EN DIAS):", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=25, column=1, padx=5, pady=5, sticky="e")
     entrada_duracion_contrato = ttk.Entry(scrollable_frame, font=("Helvetica", 14))
     entrada_duracion_contrato.grid(row=25, column=2, padx=5, pady=5, sticky="ew")
     # Enlazar la función de validación a los eventos de las entradas
@@ -726,7 +719,7 @@ def main():
 
 
     # Label y combobox para el municipio
-    tk.Label(scrollable_frame, text="DURACION DEL PERIODO DE PRUEBA (EN DIAS):", bg='#b0d4ec', font=("Helvetica", 14, "bold italic")).grid(row=25, column=3, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="DURACION DEL PERIODO DE PRUEBA (EN DIAS):", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=25, column=3, padx=5, pady=5, sticky="e")
     entrada_duracion_prueba = ttk.Entry(scrollable_frame, font=("Helvetica", 14))
     entrada_duracion_prueba.grid(row=25, column=4, padx=5, pady=5, sticky="ew")
     #entrada_duracion_prueba.bind("<FocusOut>", manejar_seleccion)
@@ -760,3 +753,5 @@ def main():
     root.mainloop()
 if __name__ == "__main__":
     main()
+
+    
