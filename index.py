@@ -398,7 +398,7 @@ def actualizar_municipios_contrato(event):
 
 def create_scrollable_frame(root):
     # Configuración de la ventana principal
-    root.geometry("800x600")  # Tamaño inicial
+    root.geometry("1280x1024")  # Tamaño inicial
     root.grid_rowconfigure(0, weight=1)  # Hacer la fila 0 expandible
     root.grid_columnconfigure(0, weight=1)  # Hacer la columna 0 expandible
 
@@ -425,11 +425,6 @@ def create_scrollable_frame(root):
     # Crear una ventana dentro del canvas para incluir el frame scrollable
     canvas_window = canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")  # Aquí se asigna la ventana a la variable
 
-    # style = ttk.Style()
-    # style.configure("Primary.TButton", background=config.PRIMARY_COLOR, foreground="white")
-    # style.configure("Secondary.TButton", background=config.SECONDARY_COLOR, foreground="white")
-    # style.configure("TFrame", background=config.PRIMARY_COLOR)  # Configurar el color de fondo del frame
-
     # Función para ajustar el tamaño del canvas cuando cambie el contenido
     def on_frame_configure(event):
         canvas.configure(scrollregion=canvas.bbox("all"))
@@ -437,7 +432,8 @@ def create_scrollable_frame(root):
     # Función para hacer el canvas responsivo al tamaño de la ventana
     def resize_canvas(event):
         canvas_width = event.width
-        canvas.itemconfig(canvas_window, width=canvas_width)
+        canvas_height = event.height
+        canvas.itemconfig(canvas_window, width=canvas_width, height=canvas_height)
 
     # Función para manejar el evento de la rueda del mouse
     def on_mouse_wheel(event):
@@ -513,7 +509,7 @@ def main():
     # Configurar las columnas y filas para que se expandan
     for i in range(10):
         scrollable_frame.grid_columnconfigure(i, weight=1)
-    for i in range(40):
+    for i in range(50):
         scrollable_frame.grid_rowconfigure(i, weight=1)
 
     # Registrar la función de validación
@@ -523,9 +519,9 @@ def main():
    
 
     # Subtítulo Datos del Empleador
-    tk.Label(scrollable_frame, text="DATOS DEL EMPLEADOR", font=("Arial", 14)).grid(row=1, column=2, columnspan=4, padx=5, pady=10)
+    tk.Label(scrollable_frame, text="DATOS DEL EMPLEADOR", bg=config.BG_SUBTITLE, font=("Arial", 14)).grid(row=1, column=2, columnspan=4, padx=5, pady=10)
     # Datos del Empleador
-    tk.Label(scrollable_frame, text="NOMBRE DEL EMPLEADOR", bg=config.BG_LABEL, font=config.FONT_LABEL).grid(row=2, column=1, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="NOMBRE DEL EMPLEADOR", bg=config.BG_SUBTITLE, font=config.FONT_LABEL).grid(row=2, column=1, padx=5, pady=5, sticky="e")
     entrada_empleador = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=config.FONT_ENTRY, validate="key")
     entrada_empleador.grid(row=2, column=2, padx=5, pady=5, sticky="ew")
 
@@ -537,7 +533,7 @@ def main():
     root.grid_rowconfigure(3, minsize=20)
 
     # Subtítulo Datos del Representante Legal
-    tk.Label(scrollable_frame, text="DATOS DEL REPRESENTANTE LEGAL", font=config.FONT_SUBTITLE).grid(row=4, column=2, columnspan=4, padx=5, pady=10)
+    tk.Label(scrollable_frame, text="DATOS DEL REPRESENTANTE LEGAL",bg=config.BG_SUBTITLE, font=config.FONT_SUBTITLE).grid(row=4, column=2, columnspan=4, padx=5, pady=10)
 
     # Datos del Representante Legal
     tk.Label(scrollable_frame, text="REPRESENTANTE LEGAL:", bg=config.BG_LABEL, font=config.FONT_LABEL).grid(row=5, column=1, padx=5, pady=5, sticky="e")
@@ -552,7 +548,7 @@ def main():
     #root.mainloop()
 
     # Subtítulo Datos del Empleador
-    tk.Label(scrollable_frame, text="DATOS DEL EMPLEADOR", font=("Helvetica", 14, "bold")).grid(row=1, column=2, columnspan=4, padx=5, pady=10)
+    tk.Label(scrollable_frame, text="DATOS DEL EMPLEADOR", bg=config.BG_SUBTITLE, font=("Helvetica", 14, "bold")).grid(row=1, column=2, columnspan=4, padx=5, pady=10)
 
     # Datos del Empleador
     tk.Label(scrollable_frame, text="NOMBRE DEL EMPLEADOR", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=2, column=1, padx=5, pady=5, sticky="e")
@@ -567,7 +563,7 @@ def main():
     root.grid_rowconfigure(3, minsize=20)
 
     # Subtítulo Datos del Representante Legal
-    tk.Label(scrollable_frame, text="DATOS DEL REPRESENTANTE LEGAL", font=("Helvetica", 16, "bold")).grid(row=4, column=2, columnspan=4, padx=5, pady=10)
+    tk.Label(scrollable_frame, text="DATOS DEL REPRESENTANTE LEGAL", bg=config.BG_SUBTITLE, font=("Helvetica", 16, "bold")).grid(row=4, column=2, columnspan=4, padx=5, pady=10)
 
     # Datos del Representante Legal
     tk.Label(scrollable_frame, text="REPRESENTANTE LEGAL:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=5, column=1, padx=5, pady=5, sticky="e")
@@ -582,7 +578,7 @@ def main():
     root.grid_rowconfigure(6, minsize=20)
 
     # Subtítulo Datos del Trabajador
-    tk.Label(scrollable_frame, text="DATOS DEL TRABAJADOR", font=("Helvetica", 16, "bold")).grid(row=7, column=2, columnspan=4, padx=5, pady=10)
+    tk.Label(scrollable_frame, text="DATOS DEL TRABAJADOR", bg=config.BG_SUBTITLE, font=("Helvetica", 16, "bold")).grid(row=7, column=2, columnspan=4, padx=5, pady=10)
 
     # Datos del Trabajador
     tk.Label(scrollable_frame, text="NOMBRE TRABAJADOR:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=8, column=1, padx=5, pady=5, sticky="e")
@@ -597,7 +593,7 @@ def main():
     root.grid_rowconfigure(9, minsize=20)
 
     # Fecha y lugar de Nacimiento
-    tk.Label(scrollable_frame, text="Fecha y lugar de Nacimiento", bg=config.BG_LABEL, font=("Helvetica", 12, "bold")).grid(row=10, column=2, columnspan=4, padx=5, pady=10)
+    tk.Label(scrollable_frame, text="Fecha y lugar de Nacimiento", bg=config.BG_ITEMS, font=("Helvetica", 12, "bold")).grid(row=10, column=2, columnspan=4, padx=5, pady=10)
 
     tk.Label(scrollable_frame, text="Fecha de Nacimiento:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=11, column=1, padx=5, pady=5, sticky="e")
     fecha_nacimiento = DateEntry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14), date_pattern='dd/MM/yyyy')
@@ -630,7 +626,7 @@ def main():
     estado_civil.grid(row=12, column=4, padx=5, pady=5, sticky="ew")
 
     # Dirección
-    tk.Label(scrollable_frame, text="Dirección y Teléfono", bg=config.BG_LABEL, font=("Helvetica", 12, "bold")).grid(row=13, column=2, columnspan=4, padx=5, pady=10)
+    tk.Label(scrollable_frame, text="Dirección y Teléfono", bg=config.BG_ITEMS, font=("Helvetica", 12, "bold")).grid(row=13, column=2, columnspan=4, padx=5, pady=10)
 
     tk.Label(scrollable_frame, text="DIRECCIÓN:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=14, column=1, padx=5, pady=5, sticky="e")
     entrada_direccion = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14))
@@ -647,7 +643,7 @@ def main():
     root.grid_rowconfigure(16, minsize=20)
 
     # Datos del Contrato
-    tk.Label(scrollable_frame, text="DATOS DEL CONTRATO", font=("Helvetica", 16, "bold")).grid(row=17, column=2, columnspan=4, padx=5, pady=10)
+    tk.Label(scrollable_frame, text="DATOS DEL CONTRATO", bg=config.BG_SUBTITLE, font=("Helvetica", 16, "bold")).grid(row=17, column=2, columnspan=4, padx=5, pady=10)
 
     tk.Label(scrollable_frame, text="CARGO QUE DESEMPEÑARÁ:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=18, column=1, padx=5, pady=5, sticky="e")
     entrada_cargo = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14))
