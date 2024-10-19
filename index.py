@@ -218,9 +218,19 @@ def validar_duracion_prueba(event=None):
         
 # Función para manejar la selección del primer Combobox
 def manejar_seleccion(event):
+    global reemplazos
+    global obra_extension_text
+
     deshabilitar_duracion_contrato(event)
     validar_duracion_prueba(event)
     actualizar_objeto_contrato(event)
+
+    if termino_contrato.get() == "POR DURACION DE OBRA O LABOR":
+        try:
+            with open('obra_extension.txt', 'r', encoding='utf-8') as file:
+                obra_extension_text = file.read().upper()            
+        except FileNotFoundError:
+            obra_extension_text = ""
 
 # Función para actualizar la visibilidad del segundo Combobox
 def actualizar_objeto_contrato(event):
@@ -233,6 +243,8 @@ def actualizar_objeto_contrato(event):
     else:
         objeto_contrato.grid_remove()
         objeto_contrato.grid_remove()
+
+
 
 def reemplazar_texto():
     global archivo_cargado
@@ -358,9 +370,12 @@ def reemplazar_texto():
             "[FECHA_FIN]": fecha_fin.upper(),
             "[FECHA_FIRMA]": fecha_firma_contrato.get_date().strftime('%d de %B del %Y').upper(),
             "[OBJETO]": objeto_contrato.get().upper(),
+            "[EXT_OBRA_LABOR]": obra_extension_text
+            
+            
 
         }
-
+        print("Diccionario de reemplazos:", reemplazos)
         # Combinar los diccionarios de reemplazos
         reemplazos.update(reemplazos_salario)
 
@@ -368,6 +383,8 @@ def reemplazar_texto():
         print("Diccionario de reemplazos (combinado):", reemplazos)
 
         reemplazar_texto_en_documento(documento, reemplazos)
+
+        
 
         # Guardar el documento
         archivo_guardado = filedialog.asksaveasfilename(
