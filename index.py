@@ -6,6 +6,8 @@ from tkcalendar import DateEntry
 from docx.shared import RGBColor
 from num2words import num2words
 from datetime import datetime, timedelta
+from docx.shared import Pt, RGBColor
+from docx.oxml.ns import qn
 import locale
 import json
 import os
@@ -104,11 +106,22 @@ def cargar_documento_por_defecto():
 
 
 def reemplazar_texto_en_documento(documento, reemplazos):
+    messagebox.showinfo("Información", f"El diccionario de reemplazos es: {reemplazos}")
+    
     for parrafo in documento.paragraphs:
         for clave, valor in reemplazos.items():
             if clave in parrafo.text:
                 print(f"Reemplazando {clave} con {valor} en el párrafo: {parrafo.text}")
                 parrafo.text = parrafo.text.replace(clave, valor)
+                # for run in parrafo.runs:
+                #     if clave in run.text:
+                #         run.text = run.text.replace(clave, valor)
+                #         if clave in reemplazos_con_fuente:
+                #             run.font.name = 'Arial'
+                #             run._element.rPr.rFonts.set(qn('w:eastAsia'), 'Arial')
+                #             run.font.size = Pt(9)
+                #             run.font.color.rgb = RGBColor(0, 0, 0)  # Establecer el color del texto a negro
+
 
 
     for tabla in documento.tables:
@@ -121,6 +134,16 @@ def reemplazar_texto_en_documento(documento, reemplazos):
                                 print(f"Reemplazando {clave} con {valor} en una celda")
                                 run.text = run.text.replace(clave, valor)
                                 run.font.color.rgb = RGBColor(0, 0, 0)  # Establecer el color del texto a negro
+                                # if clave in reemplazos_con_fuente:
+                                #     run.font.name = 'Arial'
+                                #     run._element.rPr.rFonts.set(qn('w:eastAsia'), 'Arial')
+                                #     run.font.size = Pt(9)
+                                #     run.font.color.rgb = RGBColor(0, 0, 0)  # Establecer el color del texto a negro
+
+
+   
+
+
                                 
     
 
@@ -206,8 +229,8 @@ def validar_duracion_prueba(event=None):
             messagebox.showerror("Error", "No puede exceder la quinta parte de la duración del contrato")
             entrada_duracion_prueba.delete(0, "end")
     elif termino == "INDEFINIDO":
-        if duracion_prueba > 60:
-            messagebox.showerror("Error", "No puede exceder los 60 días (2 meses) de período de prueba")
+        if duracion_prueba < 60:
+            messagebox.showerror("Error", "Debe ser mayor a 60 días (2 meses) el período de prueba")
             entrada_duracion_prueba.delete(0, "end")
     elif termino == "POR DURACION DE OBRA O LABOR":
         if duracion_prueba > 60:
@@ -215,6 +238,22 @@ def validar_duracion_prueba(event=None):
             entrada_duracion_prueba.delete(0, "end")
     else:
         print("Término del contrato no reconocido")
+
+def manejar_ext_obra_labor():
+    global reemplazos
+    global obra_extension_text
+
+    if termino_contrato.get() == "POR DURACION DE OBRA O LABOR":
+        try:
+            with open('obra_extension.txt', 'r', encoding='utf-8') as file:
+                obra_extension_text = file.read().upper()
+            reemplazos["[EXT_OBRA_LABOR]"] = obra_extension_text
+        except FileNotFoundError:
+            obra_extension_text = ""
+            reemplazos["[EXT_OBRA_LABOR]"] = obra_extension_text
+    else:
+        if "[EXT_OBRA_LABOR]" in reemplazos:
+            del reemplazos["[EXT_OBRA_LABOR]"]
         
 # Función para manejar la selección del primer Combobox
 def manejar_seleccion(event):
@@ -224,13 +263,22 @@ def manejar_seleccion(event):
     deshabilitar_duracion_contrato(event)
     validar_duracion_prueba(event)
     actualizar_objeto_contrato(event)
+    manejar_ext_obra_labor()
 
-    if termino_contrato.get() == "POR DURACION DE OBRA O LABOR":
-        try:
-            with open('obra_extension.txt', 'r', encoding='utf-8') as file:
-                obra_extension_text = file.read().upper()            
-        except FileNotFoundError:
-            obra_extension_text = ""
+    # if termino_contrato.get() == "POR DURACION DE OBRA O LABOR":
+    #     try:
+    #         with open('obra_extension.txt', 'r', encoding='utf-8') as file:
+    #             obra_extension_text = file.read().upper()
+    #         reemplazos["[EXT_OBRA_LABOR]"] = obra_extension_text
+    #         messagebox.showinfo("Información", f"El diccionario de reemplazos es: {reemplazos}")
+    #     except FileNotFoundError:
+    #         obra_extension_text = ""
+    #         reemplazos["[EXT_OBRA_LABOR]"] = obra_extension_text
+    # else:
+    #     if "[EXT_OBRA_LABOR]" in reemplazos:
+    #         del reemplazos["[EXT_OBRA_LABOR]"]
+    
+    
 
 # Función para actualizar la visibilidad del segundo Combobox
 def actualizar_objeto_contrato(event):
@@ -243,6 +291,15 @@ def actualizar_objeto_contrato(event):
     else:
         objeto_contrato.grid_remove()
         objeto_contrato.grid_remove()
+    
+    # Si el término del contrato es "INDEFINIDO" o "A TERMINO FIJO", establece "[OBJETO]" como una cadena vacía
+    if termino_contrato.get() == "INDEFINIDO" or termino_contrato.get() == "A TERMINO FIJO":
+        objeto_contrato.set("")  # Establece el valor del Combobox a una cadena vacía
+        objeto_contrato['values'] = []  # Establece el array de valores a vacío
+    else:
+        # Si el término del contrato es "POR DURACION DE OBRA O LABOR", actualiza "[OBJETO]" con el valor del Entry
+        reemplazos["[OBJETO]"] = objeto_contrato.get().upper() if objeto_contrato.get() != "Seleccione una opción" else ""
+
 
 
 
@@ -330,7 +387,7 @@ def reemplazar_texto():
             campos_faltantes.append("Término del Contrato")
         if not fecha_inicio_contrato.get_date():
             campos_faltantes.append("Fecha de Inicio del Contrato")        
-        if not objeto_contrato.get():
+        if not objeto_contrato.get() and termino_contrato.get() != "INDEFINIDO" and termino_contrato.get() != "A TERMINO FIJO":
             campos_faltantes.append("Objeto del Contrato")
         if not fecha_nacimiento.get_date():
             campos_faltantes.append("Fecha de Nacimiento")        
@@ -346,13 +403,13 @@ def reemplazar_texto():
             tk.messagebox.showerror("Error", mensaje_error)
             return
 
-        reemplazos = {
+        reemplazos.update({
             "[Empleador]": entrada_empleador.get().upper(),
             "[N.I.T]": entrada_nit.get(),
             "[REPRESENTANTE LEGAL]": entrada_representante_legal.get().upper(),
             "[C.C.]" : entrada_cc_representante_legal.get(),
             "[TRABAJADOR]": entrada_trabajador.get().upper(),
-            "[C.CNo]": entrada_cc_trabajador.get(),
+            "[C.CT]": entrada_cc_trabajador.get(),
             "[CIUDAD]": str(entrada_ciudad.get()).upper(),
             "[DEPARTAMENTO]": str(entrada_departamento.get()).upper(),
             "[DIA]": str(fecha.day),
@@ -368,19 +425,23 @@ def reemplazar_texto():
             "[TERMINO]": termino_contrato.get().upper(),
             "[FECHA_INICIO]": fecha_inicio_contrato.get_date().strftime('%d de %B del %Y').upper(),
             "[FECHA_FIN]": fecha_fin.upper(),
+            "[PERIODO_PRUEBA]": entrada_duracion_prueba.get(),
             "[FECHA_FIRMA]": fecha_firma_contrato.get_date().strftime('%d de %B del %Y').upper(),
             "[OBJETO]": objeto_contrato.get().upper(),
-            "[EXT_OBRA_LABOR]": obra_extension_text
-            
+            #"[EXT_OBRA_LABOR]": obra_extension_text           
             
 
-        }
+        })
+
+        
         print("Diccionario de reemplazos:", reemplazos)
         # Combinar los diccionarios de reemplazos
         reemplazos.update(reemplazos_salario)
 
         # Imprimir el diccionario de reemplazos combinado para verificar
         print("Diccionario de reemplazos (combinado):", reemplazos)
+
+        reemplazos_con_fuente = ["[EXT_OBRA_LABOR]"]
 
         reemplazar_texto_en_documento(documento, reemplazos)
 
@@ -542,7 +603,7 @@ def main():
     entrada_empleador = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=config.FONT_ENTRY, validate="key")
     entrada_empleador.grid(row=2, column=2, padx=5, pady=5, sticky="ew")
 
-    tk.Label(scrollable_frame, text="N.I.T EMPLEADOR:", bg=config.BG_LABEL, font=config.FONT_LABEL).grid(row=2, column=3, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="N.I.T | CC EMPLEADOR:", bg=config.BG_LABEL, font=config.FONT_LABEL).grid(row=2, column=3, padx=5, pady=5, sticky="e")
     entrada_nit = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=config.FONT_ENTRY)
     entrada_nit.grid(row=2, column=4, padx=5, pady=5, sticky="ew")
 
@@ -572,7 +633,7 @@ def main():
     entrada_empleador = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14), validate="key")
     entrada_empleador.grid(row=2, column=2, padx=5, pady=5, sticky="ew")
 
-    tk.Label(scrollable_frame, text="N.I.T EMPLEADOR:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=2, column=3, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="NIT O CC DE EMPLEADOR:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=2, column=3, padx=5, pady=5, sticky="e")
     entrada_nit = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14))
     entrada_nit.grid(row=2, column=4, padx=5, pady=5, sticky="ew")
 
@@ -612,7 +673,7 @@ def main():
     # Fecha y lugar de Nacimiento
     tk.Label(scrollable_frame, text="Fecha y lugar de Nacimiento", bg=config.BG_ITEMS, font=("Helvetica", 12, "bold")).grid(row=10, column=2, columnspan=4, padx=5, pady=10)
 
-    tk.Label(scrollable_frame, text="Fecha de Nacimiento:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=11, column=1, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="FECHA DE NACIMIENTO:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=11, column=1, padx=5, pady=5, sticky="e")
     fecha_nacimiento = DateEntry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14), date_pattern='dd/MM/yyyy')
     fecha_nacimiento.delete(0, "end")
     fecha_nacimiento.insert(0, "dd/MM/AAAA")
@@ -711,13 +772,13 @@ def main():
 
 
 
-    tk.Label(scrollable_frame, text="Fecha de Inicio de Contrato:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=24, column=1, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="FECHA DE INICIO DE CONTRATO:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=24, column=1, padx=5, pady=5, sticky="e")
     fecha_inicio_contrato = DateEntry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14), date_pattern='dd/MM/yyyy')
     fecha_inicio_contrato.delete(0, "end")
     fecha_inicio_contrato.insert(0, "dd/MM/AAAA")
     fecha_inicio_contrato.grid(row=24, column=2, padx=5, pady=5, sticky="ew")
 
-    tk.Label(scrollable_frame, text="Fecha de Firma de Contrato:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=24, column=3, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="FECHA DE FIRMA DE CONTRATO:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=24, column=3, padx=5, pady=5, sticky="e")
     fecha_firma_contrato = DateEntry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14), date_pattern='dd/MM/yyyy')
     fecha_firma_contrato.delete(0, "end")
     fecha_firma_contrato.insert(0, "dd/MM/AAAA")
