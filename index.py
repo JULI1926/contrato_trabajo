@@ -206,8 +206,8 @@ def validar_duracion_prueba(event=None):
             messagebox.showerror("Error", "No puede exceder la quinta parte de la duración del contrato")
             entrada_duracion_prueba.delete(0, "end")
     elif termino == "INDEFINIDO":
-        if duracion_prueba > 60:
-            messagebox.showerror("Error", "No puede exceder los 60 días (2 meses) de período de prueba")
+        if duracion_prueba < 60:
+            messagebox.showerror("Error", "Debe ser minimo de 60 días (2 meses) de período de prueba")
             entrada_duracion_prueba.delete(0, "end")
     elif termino == "POR DURACION DE OBRA O LABOR":
         if duracion_prueba > 60:
@@ -349,6 +349,7 @@ def reemplazar_texto():
             "[ESTADO CIVIL]": estado_civil.get().upper(),           
             "[DIRECCION]": entrada_direccion.get().upper(),  
             "[TELEFONO]": entrada_telefono.get(), 
+            "[TELEFONO_ADICIONAL]": entrada_telefono_adicional.get(),
             "[CARGO]": entrada_cargo.get().upper(),
             "[CD_CONT]": str(entrada_ciudad_contrato.get()).upper(),    
             "[DPTO_CONT]": str(entrada_departamento_contrato.get()).upper(),
@@ -357,6 +358,7 @@ def reemplazar_texto():
             "[FECHA_INICIO]": fecha_inicio_contrato.get_date().strftime('%d de %B del %Y').upper(),
             "[FECHA_FIN]": fecha_fin.upper(),
             "[FECHA_FIRMA]": fecha_firma_contrato.get_date().strftime('%d de %B del %Y').upper(),
+            "[PERIODO_PRUEBA]": entrada_duracion_prueba.get(),
             "[OBJETO]": objeto_contrato.get().upper(),
 
         }
@@ -398,7 +400,9 @@ def actualizar_municipios_contrato(event):
 
 def create_scrollable_frame(root):
     # Configuración de la ventana principal
-    root.geometry("1280x1024")  # Tamaño inicial
+    root.geometry("1280x720")  # Tamaño inicial
+    #root.attributes('-fullscreen', True)    
+    #root.state('zoomed')
     root.grid_rowconfigure(0, weight=1)  # Hacer la fila 0 expandible
     root.grid_columnconfigure(0, weight=1)  # Hacer la columna 0 expandible
 
@@ -477,7 +481,7 @@ def main():
     # Definir las variables
     global entrada_empleador, entrada_nit, entrada_representante_legal, entrada_cc_representante_legal
     global entrada_trabajador, entrada_cc_trabajador, entrada_ciudad, entrada_departamento
-    global estado_civil, entrada_direccion, entrada_telefono, entrada_cargo, entrada_ciudad_contrato
+    global estado_civil, entrada_direccion, entrada_telefono, entrada_telefono_adicional, entrada_cargo, entrada_ciudad_contrato
     global entrada_departamento_contrato, jornada_trabajo, termino_contrato, fecha_inicio_contrato
     global fecha_firma_contrato, objeto_contrato, fecha_nacimiento, salario_trabajador, entrada_duracion_contrato
     global entrada_duracion_prueba
@@ -493,6 +497,7 @@ def main():
     estado_civil = tk.StringVar()
     entrada_direccion = ttk.Entry(scrollable_frame)
     entrada_telefono = ttk.Entry(scrollable_frame)
+    entrada_telefono_adicional = ttk.Entry(scrollable_frame)
     entrada_cargo = ttk.Entry(scrollable_frame)
     entrada_ciudad_contrato = ttk.Entry(scrollable_frame)
     entrada_departamento_contrato = ttk.Entry(scrollable_frame)
@@ -525,7 +530,7 @@ def main():
     entrada_empleador = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=config.FONT_ENTRY, validate="key")
     entrada_empleador.grid(row=2, column=2, padx=5, pady=5, sticky="ew")
 
-    tk.Label(scrollable_frame, text="N.I.T EMPLEADOR:", bg=config.BG_LABEL, font=config.FONT_LABEL).grid(row=2, column=3, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="N.I.T_cEMPLEADOR:", bg=config.BG_LABEL, font=config.FONT_LABEL).grid(row=2, column=3, padx=5, pady=5, sticky="e")
     entrada_nit = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=config.FONT_ENTRY)
     entrada_nit.grid(row=2, column=4, padx=5, pady=5, sticky="ew")
 
@@ -555,7 +560,7 @@ def main():
     entrada_empleador = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14), validate="key")
     entrada_empleador.grid(row=2, column=2, padx=5, pady=5, sticky="ew")
 
-    tk.Label(scrollable_frame, text="N.I.T EMPLEADOR:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=2, column=3, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="N.I.T _CC EMPLEADOR:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=2, column=3, padx=5, pady=5, sticky="e")
     entrada_nit = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14))
     entrada_nit.grid(row=2, column=4, padx=5, pady=5, sticky="ew")
 
@@ -593,9 +598,9 @@ def main():
     root.grid_rowconfigure(9, minsize=20)
 
     # Fecha y lugar de Nacimiento
-    tk.Label(scrollable_frame, text="Fecha y lugar de Nacimiento", bg=config.BG_ITEMS, font=("Helvetica", 12, "bold")).grid(row=10, column=2, columnspan=4, padx=5, pady=10)
+    tk.Label(scrollable_frame, text="LUGAR DE NACIMIENTO", bg=config.BG_ITEMS, font=("Helvetica", 12, "bold")).grid(row=10, column=2, columnspan=4, padx=5, pady=10)
 
-    tk.Label(scrollable_frame, text="Fecha de Nacimiento:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=11, column=1, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="FECHA DE NACIMIENTO:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=11, column=1, padx=5, pady=5, sticky="e")
     fecha_nacimiento = DateEntry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14), date_pattern='dd/MM/yyyy')
     fecha_nacimiento.delete(0, "end")
     fecha_nacimiento.insert(0, "dd/MM/AAAA")
@@ -626,7 +631,7 @@ def main():
     estado_civil.grid(row=12, column=4, padx=5, pady=5, sticky="ew")
 
     # Dirección
-    tk.Label(scrollable_frame, text="Dirección y Teléfono", bg=config.BG_ITEMS, font=("Helvetica", 12, "bold")).grid(row=13, column=2, columnspan=4, padx=5, pady=10)
+    tk.Label(scrollable_frame, text="DIRECCION Y TELEFONO", bg=config.BG_ITEMS, font=("Helvetica", 12, "bold")).grid(row=13, column=2, columnspan=4, padx=5, pady=10)
 
     tk.Label(scrollable_frame, text="DIRECCIÓN:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=14, column=1, padx=5, pady=5, sticky="e")
     entrada_direccion = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14))
@@ -637,8 +642,8 @@ def main():
     entrada_telefono.grid(row=14, column=4, padx=5, pady=5, sticky="ew")
 
     tk.Label(scrollable_frame, text="TELÉFONO CONTACTO ADICIONAL:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=15, column=1, padx=5, pady=5, sticky="e")
-    entrada_telefono = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14))
-    entrada_telefono.grid(row=15, column=2, padx=5, pady=5, sticky="ew")
+    entrada_telefono_adicional = ttk.Entry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14))
+    entrada_telefono_adicional.grid(row=15, column=2, padx=5, pady=5, sticky="ew")
 
     root.grid_rowconfigure(16, minsize=20)
 
@@ -688,19 +693,19 @@ def main():
     root.grid_rowconfigure(22, minsize=21)
 
     tk.Label(scrollable_frame, text="OBJETO DEL CONTRATO DE TRABAJO:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=22, column=1, padx=5, pady=5, sticky="e")
-    objeto_contrato = ttk.Combobox(scrollable_frame, values=["LICENCIA DE MATERNIDAD", "INCREMENTO DE VENTAS", "VACACIONES"], state="readonly")
+    objeto_contrato = ttk.Combobox(scrollable_frame, values=["LICENCIA DE MATERNIDAD", "LICENCIA DE PATERNIDAD", "LICENCIA DE INCAPACIDAD", "LICENCIA POR CALAMIDAD DOMÉSTICA", "INCREMENTO DE VENTAS", "IMPLEMENTACION DE UN SISTEMA", "VACACIONES", "CAPACITACION", "MANTENIMIENTO","LIMPIEZA", "INCREMENTO EN LA PRODUCCION","PRESTACION DE SERVICIOS"], state="normal")
     objeto_contrato.set("Seleccione una opción ...")  # Valor por defecto
     objeto_contrato.grid(row=22, column=2, padx=5, pady=5, sticky="ew")
 
 
 
-    tk.Label(scrollable_frame, text="Fecha de Inicio de Contrato:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=24, column=1, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="FECHA DE INICIO DE CONTRATO:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=24, column=1, padx=5, pady=5, sticky="e")
     fecha_inicio_contrato = DateEntry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14), date_pattern='dd/MM/yyyy')
     fecha_inicio_contrato.delete(0, "end")
     fecha_inicio_contrato.insert(0, "dd/MM/AAAA")
     fecha_inicio_contrato.grid(row=24, column=2, padx=5, pady=5, sticky="ew")
 
-    tk.Label(scrollable_frame, text="Fecha de Firma de Contrato:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=24, column=3, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="FECHA DE FIN DE CONTRATO:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=24, column=3, padx=5, pady=5, sticky="e")
     fecha_firma_contrato = DateEntry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14), date_pattern='dd/MM/yyyy')
     fecha_firma_contrato.delete(0, "end")
     fecha_firma_contrato.insert(0, "dd/MM/AAAA")
