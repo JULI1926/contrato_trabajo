@@ -107,8 +107,17 @@ def reemplazar_texto_en_documento(documento, reemplazos):
     for parrafo in documento.paragraphs:
         for clave, valor in reemplazos.items():
             if clave in parrafo.text:
-                print(f"Reemplazando {clave} con {valor} en el párrafo: {parrafo.text}")
-                parrafo.text = parrafo.text.replace(clave, valor)
+                for run in parrafo.runs:
+                    if clave in run.text:
+                        run.text = run.text.replace(clave, valor)
+                        run.bold = True
+
+    
+    # for parrafo in documento.paragraphs:
+    #     for clave, valor in reemplazos.items():
+    #         if clave in parrafo.text:
+    #             print(f"Reemplazando {clave} con {valor} en el párrafo: {parrafo.text}")
+    #             parrafo.text = parrafo.text.replace(clave, valor)
 
 
     for tabla in documento.tables:
@@ -121,6 +130,7 @@ def reemplazar_texto_en_documento(documento, reemplazos):
                                 print(f"Reemplazando {clave} con {valor} en una celda")
                                 run.text = run.text.replace(clave, valor)
                                 run.font.color.rgb = RGBColor(0, 0, 0)  # Establecer el color del texto a negro
+                                run.bold = True
                                 
     
 
@@ -318,7 +328,7 @@ def reemplazar_texto():
             campos_faltantes.append("Término del Contrato")
         if not fecha_inicio_contrato.get_date():
             campos_faltantes.append("Fecha de Inicio del Contrato")        
-        if not objeto_contrato.get():
+        if not objeto_contrato.get() or objeto_contrato.get() == "Seleccione una opción ...":
             campos_faltantes.append("Objeto del Contrato")
         if not fecha_nacimiento.get_date():
             campos_faltantes.append("Fecha de Nacimiento")        
@@ -340,7 +350,7 @@ def reemplazar_texto():
             "[REPRESENTANTE LEGAL]": entrada_representante_legal.get().upper(),
             "[C.C.]" : entrada_cc_representante_legal.get(),
             "[TRABAJADOR]": entrada_trabajador.get().upper(),
-            "[C.CNo]": entrada_cc_trabajador.get(),
+            "[CCNo]": entrada_cc_trabajador.get(),
             "[CIUDAD]": str(entrada_ciudad.get()).upper(),
             "[DEPARTAMENTO]": str(entrada_departamento.get()).upper(),
             "[DIA]": str(fecha.day),
@@ -402,7 +412,7 @@ def create_scrollable_frame(root):
     # Configuración de la ventana principal
     root.geometry("1280x720")  # Tamaño inicial
     #root.attributes('-fullscreen', True)    
-    #root.state('zoomed')
+    root.state('zoomed')
     root.grid_rowconfigure(0, weight=1)  # Hacer la fila 0 expandible
     root.grid_columnconfigure(0, weight=1)  # Hacer la columna 0 expandible
 
