@@ -10,6 +10,7 @@ import locale
 import json
 import os
 import config
+import sys
 
 # Definir las variables de reemplazo como globales
 reemplazos = {}
@@ -20,10 +21,27 @@ archivo_cargado = None
 
 
 # Cargar el archivo JSON
-def cargar_datos_json(ruta_archivo):
+def cargar_datos_json(ruta_archivo=None):
     """Carga el archivo JSON y devuelve los datos."""
-    with open('municipios.json', 'r', encoding='utf-8') as archivo_json:
-        return json.load(archivo_json)
+    # Verificar si estamos ejecutando desde el ejecutable empaquetado
+    if getattr(sys, 'frozen', False):  # Si el script está empaquetado
+        application_path = sys._MEIPASS  # PyInstaller extrae archivos a esta carpeta temporal
+    else:
+        application_path = os.path.dirname(__file__)  # Si no está empaquetado, usa la ruta local
+    
+    # Ruta correcta al archivo municipios.json
+    municipios_path = os.path.join(application_path, 'municipios.json')
+    
+    # Imprime la ruta para depurar
+    print(f"Ruta al archivo municipios.json: {municipios_path}")
+    
+    # Intentar abrir el archivo JSON
+    try:
+        with open(municipios_path, 'r', encoding='utf-8') as archivo_json:
+            return json.load(archivo_json)
+    except FileNotFoundError as e:
+        print(f"Error al abrir el archivo: {e}")
+        return None
     
 
 def procesar_datos(datos_json):
@@ -104,6 +122,7 @@ def cargar_documento_por_defecto():
 
 
 def reemplazar_texto_en_documento(documento, reemplazos):
+    # Reemplazar texto en párrafos
     for parrafo in documento.paragraphs:
         for clave, valor in reemplazos.items():
             if clave in parrafo.text:
@@ -112,29 +131,19 @@ def reemplazar_texto_en_documento(documento, reemplazos):
                         run.text = run.text.replace(clave, valor)
                         run.bold = True
 
-    
-    # for parrafo in documento.paragraphs:
-    #     for clave, valor in reemplazos.items():
-    #         if clave in parrafo.text:
-    #             print(f"Reemplazando {clave} con {valor} en el párrafo: {parrafo.text}")
-    #             parrafo.text = parrafo.text.replace(clave, valor)
-
-
+    # Reemplazar texto en tablas
     for tabla in documento.tables:
         for fila in tabla.rows:
             for celda in fila.cells:
                 for parrafo in celda.paragraphs:
-                    for run in parrafo.runs:
-                        for clave, valor in reemplazos.items():
-                            if clave in run.text:
-                                print(f"Reemplazando {clave} con {valor} en una celda")
-                                run.text = run.text.replace(clave, valor)
-                                run.font.color.rgb = RGBColor(0, 0, 0)  # Establecer el color del texto a negro
-                                run.bold = True
-                                
-    
+                    for clave, valor in reemplazos.items():
+                        if clave in parrafo.text:
+                            for run in parrafo.runs:
+                                if clave in run.text:
+                                    run.text = run.text.replace(clave, valor)
+                                    run.font.color.rgb = RGBColor(0, 0, 0)  # Establecer el color del texto a negro
+                                    run.bold = True
 
-                                
     nombre_archivo = f"Contrato de Trabajo {reemplazos['[TERMINO]']} de {reemplazos['[TRABAJADOR]']}.docx"
     documento.save(nombre_archivo)
 
@@ -159,10 +168,10 @@ def reemplazar_salario_en_documento(doc_path, salario):
     return reemplazos
     
 def calcular_fecha_fin(fecha_inicio, duracion):
-    locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+     # Suponiendo que fecha_inicio es una cadena en formato 'dd/MM/yyyy'
     fecha_inicio_dt = datetime.strptime(fecha_inicio, '%d/%m/%Y')
     fecha_fin_dt = fecha_inicio_dt + timedelta(days=duracion)
-    return fecha_fin_dt.strftime('%d de %B del %Y').upper()
+    return fecha_fin_dt
 
 
 
@@ -198,7 +207,7 @@ def validar_duracion_prueba(event=None):
         print("Error al convertir la duración de prueba a entero")
         messagebox.showerror("Error", "Por favor, ingrese un valor numérico válido para la duración del período de prueba")
         return
-
+    
     if termino == "A TÉRMINO FIJO":
         duracion_contrato_str = entrada_duracion_contrato.get()
         if not duracion_contrato_str:
@@ -244,9 +253,14 @@ def actualizar_objeto_contrato(event):
         objeto_contrato.grid_remove()
         objeto_contrato.grid_remove()
 
+# Declarar la variable global
+fecha_fin_entry = None
+
 def reemplazar_texto():
     global archivo_cargado
     global reemplazos
+    global fecha_fin
+    global fecha_fin_entry
     
     fecha_inicio = fecha_inicio_contrato.get()
     
@@ -264,9 +278,15 @@ def reemplazar_texto():
     else:
         fecha_fin = ""  # O cualquier valor predeterminado que desees usar
     
+    # Asignar el valor de fecha_fin a la entrada de fecha
+    if fecha_fin:
+        fecha_fin_entry.set_date(fecha_fin)
 
     # Inicializar la lista de campos faltantes
     campos_faltantes = []
+
+     # Convertir fecha_fin a cadena y usar upper()
+    fecha_fin_str = fecha_fin.strftime('%d/%m/%Y').upper() if fecha_fin else ""
 
     # Verificar si el campo de salario no está vacío
     salario_text = salario_trabajador.get().replace('.', '')
@@ -307,8 +327,8 @@ def reemplazar_texto():
         if not entrada_ciudad.get():
             campos_faltantes.append("Ciudad")
         if not entrada_departamento.get():
-            campos_faltantes.append("Departamento")
-        if not estado_civil.get():
+            campos_faltantes.append("Departamento")       
+        if (not estado_civil.get() or estado_civil.get() == "Seleccione una opción ..."):
             campos_faltantes.append("Estado Civil")
         if not entrada_direccion.get():
             campos_faltantes.append("Dirección")
@@ -328,8 +348,10 @@ def reemplazar_texto():
             campos_faltantes.append("Término del Contrato")
         if not fecha_inicio_contrato.get_date():
             campos_faltantes.append("Fecha de Inicio del Contrato")        
-        if not objeto_contrato.get() or objeto_contrato.get() == "Seleccione una opción ...":
+        if (not objeto_contrato.get() or objeto_contrato.get() == "Seleccione una opción ...") and (termino_contrato.get() == "POR DURACION DE OBRA O LABOR"):
             campos_faltantes.append("Objeto del Contrato")
+        if objeto_contrato.get() == "Seleccione una opción ..." and termino_contrato.get() != "POR DURACION DE OBRA O LABOR":
+            objeto_contrato.set("")
         if not fecha_nacimiento.get_date():
             campos_faltantes.append("Fecha de Nacimiento")        
         if not fecha_firma_contrato.get_date():
@@ -350,7 +372,7 @@ def reemplazar_texto():
             "[REPRESENTANTE LEGAL]": entrada_representante_legal.get().upper(),
             "[C.C.]" : entrada_cc_representante_legal.get(),
             "[TRABAJADOR]": entrada_trabajador.get().upper(),
-            "[CCNo]": entrada_cc_trabajador.get(),
+            "[CC]": entrada_cc_trabajador.get(),
             "[CIUDAD]": str(entrada_ciudad.get()).upper(),
             "[DEPARTAMENTO]": str(entrada_departamento.get()).upper(),
             "[DIA]": str(fecha.day),
@@ -366,7 +388,7 @@ def reemplazar_texto():
             "[JORNADA]": jornada_trabajo.get().upper(),
             "[TERMINO]": termino_contrato.get().upper(),
             "[FECHA_INICIO]": fecha_inicio_contrato.get_date().strftime('%d de %B del %Y').upper(),
-            "[FECHA_FIN]": fecha_fin.upper(),
+            "[FECHA_FIN]": fecha_fin_str,
             "[FECHA_FIRMA]": fecha_firma_contrato.get_date().strftime('%d de %B del %Y').upper(),
             "[PERIODO_PRUEBA]": entrada_duracion_prueba.get(),
             "[OBJETO]": objeto_contrato.get().upper(),
@@ -469,6 +491,7 @@ def main():
     global archivo_label  
     global entrada_departamento, entrada_ciudad, entrada_departamento_contrato, entrada_ciudad_contrato 
     global municipios_por_departamento
+    global fecha_fin_entry
 
     # Crear la ventana principal
     root = tk.Tk()
@@ -682,7 +705,6 @@ def main():
     # Espaciado entre filas
     root.grid_rowconfigure(18, minsize=20)    
 
-
     root.grid_rowconfigure(20, minsize=20)
 
     tk.Label(scrollable_frame, text="JORNADA DE TRABAJO:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=21, column=1, padx=5, pady=5, sticky="e")
@@ -715,24 +737,31 @@ def main():
     fecha_inicio_contrato.insert(0, "dd/MM/AAAA")
     fecha_inicio_contrato.grid(row=24, column=2, padx=5, pady=5, sticky="ew")
 
-    tk.Label(scrollable_frame, text="FECHA DE FIN DE CONTRATO:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=24, column=3, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="FECHA DE FIRMA DE CONTRATO:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=24, column=3, padx=5, pady=5, sticky="e")
     fecha_firma_contrato = DateEntry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14), date_pattern='dd/MM/yyyy')
     fecha_firma_contrato.delete(0, "end")
     fecha_firma_contrato.insert(0, "dd/MM/AAAA")
     fecha_firma_contrato.grid(row=24, column=4, padx=5, pady=5, sticky="ew")
 
+    #fecha_fin_var = tk.StringVar()
+
+    tk.Label(scrollable_frame, text="FECHA DE FIN DE CONTRATO:", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=25, column=1, padx=5, pady=5, sticky="e")
+    fecha_fin_entry = DateEntry(scrollable_frame, style="Rounded.TEntry", font=("Helvetica", 14), date_pattern='dd/MM/yyyy')
+    fecha_fin_entry.grid(row=25, column=2, padx=5, pady=5, sticky="ew")
+  
+
     # Label y combobox para el municipio
-    tk.Label(scrollable_frame, text="DURACION DEL CONTRATO (EN DIAS):", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=25, column=1, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="DURACION DEL CONTRATO (EN DIAS):", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=25, column=3, padx=5, pady=5, sticky="e")
     entrada_duracion_contrato = ttk.Entry(scrollable_frame, font=("Helvetica", 14))
-    entrada_duracion_contrato.grid(row=25, column=2, padx=5, pady=5, sticky="ew")
+    entrada_duracion_contrato.grid(row=25, column=4, padx=5, pady=5, sticky="ew")
     # Enlazar la función de validación a los eventos de las entradas
     entrada_duracion_contrato.bind("<FocusOut>", validar_duracion_prueba)
 
 
     # Label y combobox para el municipio
-    tk.Label(scrollable_frame, text="DURACION DEL PERIODO DE PRUEBA (EN DIAS):", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=25, column=3, padx=5, pady=5, sticky="e")
+    tk.Label(scrollable_frame, text="DURACION DEL PERIODO DE PRUEBA (EN DIAS):", bg=config.BG_LABEL, font=("Helvetica", 14, "bold italic")).grid(row=26, column=1, padx=5, pady=5, sticky="e")
     entrada_duracion_prueba = ttk.Entry(scrollable_frame, font=("Helvetica", 14))
-    entrada_duracion_prueba.grid(row=25, column=4, padx=5, pady=5, sticky="ew")
+    entrada_duracion_prueba.grid(row=26, column=2, padx=5, pady=5, sticky="ew")
     #entrada_duracion_prueba.bind("<FocusOut>", manejar_seleccion)
     entrada_duracion_prueba.bind("<FocusOut>", validar_duracion_prueba)
 
